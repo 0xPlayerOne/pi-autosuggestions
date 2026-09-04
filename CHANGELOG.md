@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.1](https://github.com/0xPlayerOne/pi-autosuggestions/compare/pi-autosuggestions-v0.3.0...pi-autosuggestions-v0.3.1) (2026-09-04)
+
+
+### Bug Fixes
+
+* keep the character under the cursor visible while the beam blinks ([16833a7](https://github.com/0xPlayerOne/pi-autosuggestions/commit/16833a788d30fb92e99a98fd29927d2ecaed8790))
+
 ## [0.3.0](https://github.com/0xPlayerOne/pi-autosuggestions/compare/pi-autosuggestions-v0.2.4...pi-autosuggestions-v0.3.0) (2026-09-04)
 
 
