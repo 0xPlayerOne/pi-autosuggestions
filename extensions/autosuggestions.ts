@@ -40,7 +40,8 @@ const BLINK_INTERVAL_MS = 500;
 /** Cursor stays solid for this long after each keystroke, then resumes blinking. */
 const SOLID_AFTER_INPUT_MS = 450;
 
-type Ghost = { lineIndex: number; prefix: string; remainder: string };
+type GhostSource = "history" | "path";
+type Ghost = { lineIndex: number; typed: string; suggestion: string; source: GhostSource };
 
 class BashInlineEditor extends CustomEditor {
 	private realProvider: AutocompleteProvider | undefined;
@@ -51,6 +52,10 @@ class BashInlineEditor extends CustomEditor {
 	private cursorOn = true;
 	private lastInputAt = 0;
 	private blinkTimer?: ReturnType<typeof setInterval>;
+	/** Submitted prompts, oldest first — the zsh-autosuggestions history strategy. */
+	private promptHistory: string[] = [];
+	/** Set by Escape; keeps the ghost dismissed until the next text edit. */
+	private ghostSuppressed = false;
 
 	constructor(tui: TUI, theme: EditorTheme, keybindings: KeybindingsManager) {
 		super(tui, theme, keybindings);
@@ -73,6 +78,28 @@ class BashInlineEditor extends CustomEditor {
 				external = fn;
 			},
 		});
+		// Capture submitted prompts for the history suggestion strategy
+		// (zsh-autosuggestions records everything written to the shell line).
+		let externalSubmit: ((text: string) => void) | undefined;
+		Object.defineProperty(this, "onSubmit", {
+			configurable: true,
+			enumerable: true,
+			get() {
+				if (!externalSubmit) return undefined;
+				return (text: string) => {
+					if (text.trim()) {
+						self.promptHistory.push(text);
+						if (self.promptHistory.length > 500) {
+							self.promptHistory.shift();
+						}
+					}
+					externalSubmit!(text);
+				};
+			},
+			set(fn) {
+				externalSubmit = fn;
+			},
+		});
 	}
 
 	// Pi installs the shared autocomplete provider here. Wrap it once with
@@ -90,20 +117,33 @@ class BashInlineEditor extends CustomEditor {
 		// Solid cursor while typing; blinking resumes after the idle window.
 		this.lastInputAt = Date.now();
 		this.cursorOn = true;
-		// Right arrow accepts the ghost suggestion when the cursor sits at EOL.
-		if (matchesKey(data, "right") && this.activeGhost() && this.cursorAtLineEnd()) {
-			this.acceptGhost();
-			return;
+		// Accept keys while a ghost suggestion is showing and the cursor sits
+		// at end of line (zsh-autosuggestions widget semantics):
+		//   right        → accept the whole suggestion
+		//   alt+f        → accept the next word (partial accept)
+		//   ctrl+right   → accept the next word (partial accept)
+		if (matchesKey(data, "escape")) {
+			this.ghostSuppressed = true;
+		} else {
+			this.ghostSuppressed = false;
+		}
+		if (this.activeGhost() && this.cursorAtLineEnd()) {
+			if (matchesKey(data, "right")) {
+				this.acceptGhost();
+				return;
+			}
+			if (matchesKey(data, "alt+f") || matchesKey(data, "ctrl+right")) {
+				this.acceptGhostWord();
+				return;
+			}
 		}
 		super.handleInput(data);
 		if (matchesKey(data, "escape")) {
 			this.ghost = null;
 		}
-		if (this.inBashMode()) {
-			this.updateGhost();
-		} else if (this.ghost) {
-			this.ghost = null;
-		}
+		// History suggestions work in every mode; bash mode adds the path
+		// strategy (updateGhost clears the ghost itself when nothing matches).
+		this.updateGhost();
 	}
 
 	handleTabCompletion(): void {
@@ -119,9 +159,7 @@ class BashInlineEditor extends CustomEditor {
 	// @ts-ignore — intentional runtime override of a private base method
 	setCursorCol(col: number): void {
 		Editor.prototype.setCursorCol.call(this, col);
-		if (this.inBashMode()) {
-			this.updateGhost();
-		}
+		this.updateGhost();
 	}
 
 	render(width: number): string[] {
@@ -144,11 +182,12 @@ class BashInlineEditor extends CustomEditor {
 		if (ghost) {
 			// Base row layout: text + cursor cell + padding. Drop the cursor
 			// cell (frees 1 col) and render ghost chars into the padding.
+			const remainder = ghost.suggestion.slice(ghost.typed.length);
 			const pad = / *$/.exec(row.slice(match.index + match[0].length))?.[0].length ?? 0;
 			const avail = pad + 1;
 			let used = 0;
 			const cells: string[] = [];
-			for (const ch of [...ghost.remainder]) {
+			for (const ch of [...remainder]) {
 				const w = visibleWidth(ch);
 				if (used + w > avail) {
 					break;
@@ -203,12 +242,11 @@ class BashInlineEditor extends CustomEditor {
 	}
 
 	/**
-	 * Wrap the stock provider with bash-mode behavior. This is the single
-	 * decision point for both the ghost and the dropdown:
+	 * Wrap the stock provider with bash-mode behavior:
 	 *   - command position ("!cd", no space yet) → suggest all entries
-	 *   - multiple matches → normal suggestions (stock dropdown shows them)
-	 *   - exactly one match → divert to the inline ghost, close any popup
 	 *   - non-bash text → untouched stock behavior
+	 * The ghost-vs-dropdown split (one match → ghost, many → dropdown) is
+	 * decided in updateGhost(), which sees the final suggestion counts.
 	 */
 	private createBashProvider(current: AutocompleteProvider): AutocompleteProvider {
 		const self = this;
@@ -218,35 +256,17 @@ class BashInlineEditor extends CustomEditor {
 					return current.getSuggestions(lines, cursorLine, cursorCol, options);
 				}
 				const before = (lines[cursorLine] ?? "").slice(0, cursorCol);
-				const commandPos = self.commandPosition(before);
 				let queryLines = lines;
-				if (commandPos) {
+				if (self.commandPosition(before)) {
 					// Neutralize the command word so the provider completes the
 					// (empty) argument position: every entry matches.
 					queryLines = [...lines];
 					queryLines[cursorLine] = before.replace(/![^!\s]*$/, "! ");
 				}
-				const suggestions = await current.getSuggestions(queryLines, cursorLine, cursorCol, {
+				return current.getSuggestions(queryLines, cursorLine, cursorCol, {
 					...options,
 					force: true,
 				});
-				const items = suggestions?.items ?? [];
-				if (items.length === 1) {
-					// Exactly one option: inline ghost instead of a popup. Returning
-					// null makes the stock machinery close/skip the dropdown.
-					const prefix = suggestions?.prefix ?? "";
-					const value = items[0]?.value ?? "";
-					const remainder = value.toLowerCase().startsWith(prefix.toLowerCase())
-						? value.slice(prefix.length)
-						: "";
-					self.ghost = remainder ? { lineIndex: cursorLine, prefix, remainder } : null;
-					return null;
-				}
-				if (items.length === 0) {
-					self.ghost = null;
-					return null;
-				}
-				return suggestions;
 			},
 
 			applyCompletion(lines, cursorLine, cursorCol, item, prefix) {
@@ -268,20 +288,60 @@ class BashInlineEditor extends CustomEditor {
 			},
 		};
 	}
+	/** The ghost suggestion, only if it still matches the current editor state. */
 	private activeGhost(): Ghost | null {
 		const ghost = this.ghost;
-		if (!ghost || this.isShowingAutocomplete() || !this.inBashMode()) {
+		if (!ghost || this.isShowingAutocomplete() || !this.cursorAtLineEnd()) {
 			return null;
 		}
 		const st = (this as unknown as EditorInternals).state;
-		if (ghost.lineIndex !== st.cursorLine || !this.cursorAtLineEnd()) {
+		if (ghost.lineIndex !== st.cursorLine) {
 			return null;
 		}
 		const line = st.lines[st.cursorLine] ?? "";
-		if (!line.toLowerCase().endsWith(ghost.prefix.toLowerCase())) {
+		const before = line.slice(0, st.cursorCol);
+		if (before !== ghost.typed || ghost.suggestion.length <= ghost.typed.length) {
 			return null;
 		}
 		return ghost;
+	}
+
+	/** Most recent history entry extending the current line (history strategy). */
+	private historyGhost(): Ghost | null {
+		const st = (this as unknown as EditorInternals).state;
+		const line = st.lines[st.cursorLine] ?? "";
+		const typed = line.slice(0, st.cursorCol);
+		if (!typed.trim()) {
+			return null;
+		}
+		for (let i = this.promptHistory.length - 1; i >= 0; i--) {
+			const entry = this.promptHistory[i] ?? "";
+			// Suggest only the entry's first line: ghost text renders on a
+			// single editor row (full multi-line entries are inserted on accept).
+			const firstLine = entry.split("\n", 1)[0] ?? "";
+			if (firstLine.length > typed.length && firstLine.startsWith(typed)) {
+				return { lineIndex: st.cursorLine, typed, suggestion: firstLine, source: "history" };
+			}
+		}
+		return null;
+	}
+
+	/** Path ghost from provider suggestions (completion strategy, bash mode). */
+	private pathGhost(suggestions: AutocompleteSuggestions | null, lineIndex: number): Ghost | null {
+		const st = (this as unknown as EditorInternals).state;
+		const line = st.lines[lineIndex] ?? "";
+		const before = line.slice(0, st.cursorCol);
+		const token = suggestions?.prefix ?? "";
+		const value = suggestions?.items[0]?.value ?? "";
+		if (!value || !value.toLowerCase().startsWith(token.toLowerCase())) {
+			return null;
+		}
+		const separator = this.commandPosition(before) ? " " : "";
+		const suggestion = before.slice(0, before.length - token.length) + separator + value;
+		if (suggestion.length <= before.length) {
+			return null;
+		}
+		return { lineIndex, typed: before, suggestion, source: "path" };
 	}
 
 	private acceptGhost(): void {
@@ -292,36 +352,69 @@ class BashInlineEditor extends CustomEditor {
 		const st = (this as unknown as EditorInternals).state;
 		const line = st.lines[ghost.lineIndex] ?? "";
 		const col = st.cursorCol;
-		const completed = ghost.prefix + ghost.remainder;
-		const before = line.slice(0, col);
-		// Completing from the command position: the path becomes the first
-		// argument, so a leading space is part of the insertion.
-		const separator = this.commandPosition(before) ? " " : "";
 		(this as unknown as EditorInternals).pushUndoSnapshot();
-		st.lines[ghost.lineIndex] = line.slice(0, col - ghost.prefix.length) + separator + completed + line.slice(col);
+		st.lines[ghost.lineIndex] = line.slice(0, col - ghost.typed.length) + ghost.suggestion + line.slice(col);
 		this.ghost = null;
-		(this as unknown as EditorInternals).setCursorCol(
-			col - ghost.prefix.length + separator.length + completed.length,
-		);
+		(this as unknown as EditorInternals).setCursorCol(col - ghost.typed.length + ghost.suggestion.length);
 		this.onChange?.(this.getText());
-		// Like zsh: after completing into a directory, suggest its first entry.
+		// Like zsh: after accepting, immediately suggest the next part.
+		this.updateGhost();
+	}
+
+	/** Partial accept (autosuggest-accept-word): take the next word of the suggestion. */
+	private acceptGhostWord(): void {
+		const ghost = this.activeGhost();
+		if (!ghost) {
+			return;
+		}
+		const remainder = ghost.suggestion.slice(ghost.typed.length);
+		const chunk = /^\S+\s*/.exec(remainder)?.[0];
+		if (!chunk) {
+			return;
+		}
+		const st = (this as unknown as EditorInternals).state;
+		const line = st.lines[ghost.lineIndex] ?? "";
+		const col = st.cursorCol;
+		(this as unknown as EditorInternals).pushUndoSnapshot();
+		st.lines[ghost.lineIndex] = line.slice(0, col) + chunk + line.slice(col);
+		this.ghost = { ...ghost, typed: ghost.typed + chunk };
+		(this as unknown as EditorInternals).setCursorCol(col + chunk.length);
+		this.onChange?.(this.getText());
 		this.updateGhost();
 	}
 
 	private updateGhost(): void {
-		const token = ++this.ghostToken;
-		const provider = this.bashProvider;
-		if (!provider || !this.inBashMode() || !this.cursorAtLineEnd()) {
+		const st = this as unknown as EditorInternals;
+		// Dismissed via Escape; stays dismissed until the next text edit.
+		if (this.ghostSuppressed) {
 			this.ghost = null;
 			return;
 		}
-		const state = (this as unknown as EditorInternals).state;
-		const lineIndex = state.cursorLine;
+		// zsh-autosuggestions hides the suggestion once the cursor moves off
+		// the end of the buffer.
+		if (!this.cursorAtLineEnd()) {
+			this.ghost = null;
+			return;
+		}
+		const history = this.historyGhost();
+		if (!this.inBashMode()) {
+			// History strategy works everywhere, like zsh-autosuggestions.
+			this.ghost = history;
+			st.tui.requestRender();
+			return;
+		}
+		const provider = this.bashProvider;
+		if (!provider) {
+			this.ghost = history;
+			return;
+		}
+		const token = ++this.ghostToken;
+		const lineIndex = st.state.cursorLine;
 		const controller = new AbortController();
 		this.ghostAbort?.abort();
 		this.ghostAbort = controller;
 		void provider
-			.getSuggestions(state.lines, lineIndex, state.cursorCol, {
+			.getSuggestions(st.state.lines, lineIndex, st.state.cursorCol, {
 				signal: controller.signal,
 				force: true,
 			})
@@ -329,13 +422,20 @@ class BashInlineEditor extends CustomEditor {
 				if (token !== this.ghostToken) {
 					return;
 				}
-				// The wrapper owns ghost state (single matches are diverted to
-				// the ghost there); this only triggers the dropdown for >1.
 				const items = suggestions?.items ?? [];
-				const st = this as unknown as EditorInternals;
-				if (items.length > 1 && !this.isShowingAutocomplete()) {
+				if (items.length > 1) {
+					// Multiple path options win: show the stock dropdown, no ghost.
 					this.ghost = null;
-					st.requestAutocomplete({ force: true, explicitTab: false });
+					if (!this.isShowingAutocomplete()) {
+						st.requestAutocomplete({ force: true, explicitTab: false });
+					}
+				} else {
+					// Zero or one path option: prefer the history ghost, then the
+					// path ghost (zsh-autosuggestions strategy order: history first).
+					if (this.isShowingAutocomplete()) {
+						st.cancelAutocomplete();
+					}
+					this.ghost = history ?? this.pathGhost(suggestions, lineIndex);
 				}
 				st.tui.requestRender();
 			})
