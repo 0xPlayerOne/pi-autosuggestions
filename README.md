@@ -52,6 +52,21 @@ suggest elsewhere.
 - **`Esc`** — dismiss the suggestion until your next edit
 - Suggestion hides when the cursor leaves end-of-line, returns when you come back
 
+### Subcommand completion (bash mode)
+
+For well-known commands the **first argument** completes from a built-in
+subcommand table instead of the filesystem:
+
+| Input | Result |
+|-------|--------|
+| `!git s` | dropdown — `show`, `stash`, `status`, … (marked `git subcommand`) |
+| `!git statu` | inline ghost `s` → `status` |
+| `!git zz` | no subcommand match → falls back to path completion |
+
+Covered commands: `git`, `npm`, `pnpm`, `yarn`, `bun`, `docker`, `kubectl`,
+`cargo`, `brew`, `gh`. Deeper arguments (branch names, flags, file args)
+still complete from history or the filesystem.
+
 ### Command completion (bash mode)
 
 The first word after `!` completes against **executables on your `$PATH`** —

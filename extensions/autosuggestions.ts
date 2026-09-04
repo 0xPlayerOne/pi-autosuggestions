@@ -39,6 +39,72 @@ const BEAM = "\x1b[1m▏\x1b[0m";
 /** Matches the reverse-video block the base renderer emits for the cursor. */
 const REVERSE_CURSOR = /\x1b\[7m([\s\S]*?)\x1b\[0m/;
 
+/** First-argument (subcommand) completions for common commands. */
+const SUBCOMMANDS: Record<string, string[]> = {
+	git: [
+		"add", "am", "apply", "archive", "bisect", "blame", "branch", "bundle", "checkout",
+		"cherry-pick", "clean", "clone", "commit", "config", "describe", "diff", "fetch",
+		"fsck", "gc", "init", "log", "merge", "mv", "pull", "push", "rebase", "reflog",
+		"remote", "repack", "reset", "restore", "revert", "rm", "shortlog", "show",
+		"stash", "status", "submodule", "switch", "tag", "worktree",
+	],
+	npm: [
+		"audit", "bin", "bugs", "cache", "ci", "completion", "config", "dedupe", "deprecate",
+		"diff", "dist-tag", "docs", "doctor", "edit", "exec", "explain", "explore", "find-dupes",
+		"fund", "help", "hook", "init", "install", "link", "login", "logout", "ls", "npm-autoinit",
+		"org", "outdated", "owner", "pack", "ping", "pkg", "prefix", "profile", "prune",
+		"publish", "query", "rebuild", "repo", "restart", "root", "run-script", "search",
+		"set", "shrinkwrap", "star", "stars", "start", "stop", "team", "test", "token",
+		"uninstall", "unpublish", "unstar", "update", "version", "view", "whoami",
+	],
+	pnpm: [
+		"add", "audit", "bin", "config", "create", "dlx", "exec", "import", "init", "install",
+		"link", "list", "outdated", "pack", "patch", "prune", "publish", "rebuild", "remove",
+		"rename", "run", "store", "test", "unlink", "update", "why",
+	],
+	yarn: [
+		"add", "audit", "bin", "cache", "config", "create", "dedupe", "dlx", "exec", "global",
+		"info", "init", "install", "link", "list", "outdated", "owner", "pack", "publish",
+		"remove", "run", "self", "unlink", "upgrade", "up", "version", "why", "workspace", "workspaces",
+	],
+	bun: [
+		"add", "build", "create", "init", "install", "link", "outdated", "pm", "publish",
+		"remove", "run", "test", "unlink", "update", "upgrade", "x",
+	],
+	docker: [
+		"attach", "build", "commit", "container", "cp", "create", "diff", "events", "exec",
+		"export", "history", "image", "images", "import", "info", "inspect", "kill", "load",
+		"login", "logout", "logs", "network", "pause", "port", "ps", "pull", "push", "rename",
+		"restart", "rm", "rmi", "run", "save", "search", "start", "stats", "stop", "system",
+		"tag", "top", "unpause", "update", "version", "volume", "wait",
+	],
+	kubectl: [
+		"annotate", "api-resources", "api-versions", "apply", "attach", "auth", "autoscale",
+		"cluster-info", "completion", "config", "cordon", "cp", "create", "delete", "describe",
+		"diff", "drain", "edit", "exec", "explain", "expose", "get", "label", "logs", "options",
+		"patch", "port-forward", "proxy", "replace", "rollout", "run", "scale", "set", "taint",
+		"top", "uncordon", "version", "wait",
+	],
+	cargo: [
+		"add", "bench", "build", "check", "clean", "doc", "fetch", "fix", "fmt", "init",
+		"install", "locate-project", "login", "logout", "metadata", "new", "owner", "package",
+		"publish", "read-manifest", "remove", "report", "run", "rustc", "rustdoc", "search",
+		"test", "tree", "uninstall", "update", "vendor", "verify-project", "version", "yank",
+	],
+	brew: [
+		"audit", "bundle", "cleanup", "commands", "config", "deps", "desc", "doctor", "edit",
+		"fetch", "formula", "home", "info", "install", "leaves", "link", "list", "log",
+		"missing", "options", "outdated", "pin", "postinstall", "readall", "reinstall",
+		"search", "services", "style", "tap", "uninstall", "unlink", "unpin", "untap",
+		"update", "upgrade", "uses",
+	],
+	gh: [
+		"alias", "api", "auth", "browse", "cache", "codespace", "completion", "config",
+		"extension", "gist", "gpg-key", "issue", "label", "org", "pr", "project", "release",
+		"repo", "run", "search", "secret", "ssh-key", "status", "variable", "workflow",
+	],
+};
+
 const BLINK_INTERVAL_MS = 500;
 /** Cursor stays solid for this long after each keystroke, then resumes blinking. */
 const SOLID_AFTER_INPUT_MS = 450;
@@ -319,6 +385,30 @@ class BashInlineEditor extends CustomEditor {
 					return current.getSuggestions(lines, cursorLine, cursorCol, options);
 				}
 				const before = (lines[cursorLine] ?? "").slice(0, cursorCol);
+				// First-argument completion for known commands:
+				// "!git s" → status/stash/show… (replaces path completion).
+				const arg = /^[\t ]*!+(\S+)[ \t]+(\S*)$/.exec(before);
+				if (arg) {
+					const cmd = arg[1]!;
+					const token = arg[2] ?? "";
+					const subs = SUBCOMMANDS[cmd];
+					if (subs) {
+						const matches = subs
+							.filter((sc) => sc.startsWith(token))
+							.slice(0, 50);
+						if (matches.length > 0) {
+							return {
+								items: matches.map((sc) => ({
+									value: sc,
+									label: sc,
+									description: `${cmd} subcommand`,
+								})),
+								prefix: token,
+							};
+						}
+						// No subcommand matches the prefix: fall through to paths.
+					}
+				}
 				let queryLines = lines;
 				let commandItems: AutocompleteItem[] = [];
 				let word = "";
