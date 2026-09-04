@@ -203,7 +203,11 @@ class BashInlineEditor extends CustomEditor {
 			return out;
 		}
 		const ch = match[1] || " ";
-		const cursorCell = this.cursorOn ? BEAM : ch;
+		// The beam only replaces empty cells — over a letter it would black
+		// the character out every other blink. Cursor over a letter instead
+		// renders that letter underlined while visible (zsh bar cursors draw
+		// the bar in the same cell; a terminal grid can't, so underline wins).
+		const cursorCell = this.cursorOn ? (ch === " " ? BEAM : `\x1b[4m${ch}${RESET}`) : ch;
 		out[rowIdx] = head + cursorCell + row.slice(match.index + match[0].length);
 		return out;
 	}
