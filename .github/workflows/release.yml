@@ -1,35 +1,46 @@
-name: Code Foundry
+name: Release
 
 on:
   push:
     branches: [main]
-  workflow_dispatch:
-    inputs:
-      release-while-paused:
-        description: Run only the release pipeline while the shared CI billing pause remains active.
-        required: false
-        type: boolean
-        default: false
 
 permissions:
-  actions: write
   contents: write
-  issues: write
   pull-requests: write
   id-token: write
 
 jobs:
-  release:
-    name: Release
-    if: vars.CI_BILLING_PAUSED != 'true' || (github.event_name == 'workflow_dispatch' && inputs['release-while-paused'] == true)
-    uses: 0xPlayerOne/code-foundry/.github/workflows/release.yml@v0.31.12
-    with:
-      billing-pause-bypass: ${{ github.event_name == 'workflow_dispatch' && inputs['release-while-paused'] == true }}
-      runner: ubuntu-slim
-      runtime-repository: 0xPlayerOne/code-foundry
-      runtime-ref: v0.31.12
-    secrets:
-      CODE_FOUNDRY_TOKEN: ${{ secrets.CODE_FOUNDRY_TOKEN }}
-      RELEASE_PLEASE_TOKEN: ${{ secrets.RELEASE_PLEASE_TOKEN }}
-      STAGING_DEPLOY_KEY: ${{ secrets.STAGING_DEPLOY_KEY }}
-      NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+  release-please:
+    name: Release Please
+    runs-on: ubuntu-latest
+    outputs:
+      release_created: ${{ steps.release.outputs.release_created }}
+      tag_name: ${{ steps.release.outputs.tag_name }}
+    steps:
+      - name: Release Please
+        id: release
+        uses: googleapis/release-please-action@45996ed1f6d02564a971a2fa1b5860e934307cf7 # v4/v5 pin
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          config-file: release-please-config.json
+          manifest-file: .release-please-manifest.json
+
+  publish-npm:
+    name: Publish npm
+    needs: release-please
+    if: needs.release-please.outputs.release_created == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout release
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: ${{ needs.release-please.outputs.tag_name }}
+      - name: Setup Node
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24
+          registry-url: https://registry.npmjs.org
+      - name: Publish
+        run: npm publish --provenance --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
