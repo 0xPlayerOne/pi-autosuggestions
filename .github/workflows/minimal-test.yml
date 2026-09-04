@@ -1,0 +1,25 @@
+name: Minimal Call Test
+
+on:
+  workflow_dispatch:
+
+permissions:
+  actions: write
+  contents: write
+  issues: write
+  pull-requests: write
+  id-token: write
+
+jobs:
+  release:
+    name: Release
+    uses: 0xPlayerOne/code-foundry/.github/workflows/release.yml@v0.39.4
+    with:
+      runner: ubuntu-slim
+      runtime-repository: 0xPlayerOne/code-foundry
+      runtime-ref: v0.39.4
+    secrets:
+      CODE_FOUNDRY_TOKEN: ${{ secrets.CODE_FOUNDRY_TOKEN }}
+      RELEASE_PLEASE_TOKEN: ${{ secrets.RELEASE_PLEASE_TOKEN }}
+      STAGING_DEPLOY_KEY: ${{ secrets.STAGING_DEPLOY_KEY }}
+      NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
