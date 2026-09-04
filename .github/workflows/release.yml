@@ -1,0 +1,12 @@
+name: Release
+
+on:
+  push:
+    branches: [main]
+
+permissions: {}
+
+jobs:
+  release:
+    uses: 0xPlayerOne/code-foundry/.github/workflows/release.yml@v0.31.12
+    secrets: inherit

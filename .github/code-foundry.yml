@@ -1,0 +1,4 @@
+# Code Foundry release profile (see 0xPlayerOne/code-foundry).
+release_type: node
+npm_publish: "true"
+release_merge_strategy: rebase

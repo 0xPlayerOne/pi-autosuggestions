@@ -1,16 +1,25 @@
 {
-	"name": "pi-ghost",
-	"version": "0.1.0",
-	"description": "zsh-style inline ghost completion for bash mode (!commands) in the pi coding agent — with automatic dropdown fallback for multiple matches",
-	"keywords": ["pi-package", "pi", "autocomplete", "completions", "shell", "zsh"],
-	"license": "MIT",
-	"author": "Andrew Mahoney-Fernandes <0xPlayerOne>",
-	"type": "module",
-	"pi": {
-		"extensions": ["./extensions/*.ts"]
-	},
-	"peerDependencies": {
-		"@earendil-works/pi-coding-agent": "*",
-		"@earendil-works/pi-tui": "*"
-	}
+  "name": "pi-autosuggestions",
+  "version": "0.1.0",
+  "description": "zsh-autosuggestions-style ghost completions for the pi coding agent — history-based inline suggestions, path completion in bash mode, blinking beam cursor",
+  "keywords": [
+    "pi-package",
+    "pi",
+    "autocomplete",
+    "completions",
+    "autosuggestions",
+    "zsh"
+  ],
+  "license": "MIT",
+  "author": "Andrew Mahoney-Fernandes <0xPlayerOne>",
+  "type": "module",
+  "pi": {
+    "extensions": [
+      "./extensions/*.ts"
+    ]
+  },
+  "peerDependencies": {
+    "@earendil-works/pi-coding-agent": "*",
+    "@earendil-works/pi-tui": "*"
+  }
 }
