@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.2](https://github.com/0xPlayerOne/pi-autosuggestions/compare/pi-autosuggestions-v0.3.1...pi-autosuggestions-v0.3.2) (2026-09-04)
+
+
+### Bug Fixes
+
+* use the terminal's native blinking bar cursor ([2abf68b](https://github.com/0xPlayerOne/pi-autosuggestions/commit/2abf68b1f226c9b62ec2c9cdebeb3375601de632))
+
 ## [0.3.1](https://github.com/0xPlayerOne/pi-autosuggestions/compare/pi-autosuggestions-v0.3.0...pi-autosuggestions-v0.3.1) (2026-09-04)
 
 
