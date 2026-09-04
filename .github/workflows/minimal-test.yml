@@ -1,0 +1,11 @@
+name: Minimal Call Test
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  call:
+    uses: 0xPlayerOne/code-foundry/.github/workflows/release.yml@v0.31.12
