@@ -84,11 +84,16 @@ In bash mode (`!command`), a second strategy completes **filesystem paths**:
   zero or one option → ghost, with history winning over paths
 - Works for `!!` hidden commands and any bash argument, not just `cd`
 
-### Beam cursor
+### Native blinking bar cursor
 
-The block cursor becomes a thin blinking vertical bar (`▏`, ~2 Hz) that stays
-solid while you type. On ghost rows the cursor rides the suggestion's first
-character, zsh-autosuggestions style.
+The editor's fake block cursor is replaced by your terminal's **native blinking
+bar cursor** — the same behavior as Apple Terminal's bar style: it overlays the
+cell edge without ever covering the character, blinks on its own, and pauses
+blinking while you type. On ghost rows the bar rides the suggestion's first
+character. The extension requests the blinking-bar shape via `DECSCUSR`
+(`CSI 5 q`); terminals without that escape use their profile's cursor shape.
+A software beam cursor is kept as a fallback if the hardware cursor is
+unavailable.
 
 ## Attribution
 

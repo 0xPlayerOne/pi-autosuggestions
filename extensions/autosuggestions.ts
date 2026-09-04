@@ -52,9 +52,6 @@ class BashInlineEditor extends CustomEditor {
 	private ghost: Ghost | null = null;
 	private ghostToken = 0;
 	private ghostAbort?: AbortController;
-	private cursorOn = true;
-	private lastInputAt = 0;
-	private blinkTimer?: ReturnType<typeof setInterval>;
 	/** Submitted prompts, oldest first — the zsh-autosuggestions history strategy. */
 	private promptHistory: string[] = [];
 	/** Set by Escape; keeps the ghost dismissed until the next text edit. */
@@ -62,7 +59,12 @@ class BashInlineEditor extends CustomEditor {
 
 	constructor(tui: TUI, theme: EditorTheme, keybindings: KeybindingsManager) {
 		super(tui, theme, keybindings);
-		this.startBlink();
+		// Native terminal cursor = the Apple-Terminal-style blinking bar: it
+		// draws over the glyph's cell edge without covering the character.
+		// DECSCUSR 5 q requests a blinking bar where the terminal supports
+		// it; otherwise the terminal profile's cursor shape is used as-is.
+		tui.setShowHardwareCursor(true);
+		tui.terminal.write("\x1b[5 q");
 		// Wrap onChange so programmatic text changes (paste, undo, history,
 		// setText) also refresh the inline suggestion.
 		let external: ((text: string) => void) | undefined;
@@ -117,9 +119,6 @@ class BashInlineEditor extends CustomEditor {
 	}
 
 	handleInput(data: string): void {
-		// Solid cursor while typing; blinking resumes after the idle window.
-		this.lastInputAt = Date.now();
-		this.cursorOn = true;
 		// Accept keys while a ghost suggestion is showing and the cursor sits
 		// at end of line (zsh-autosuggestions widget semantics):
 		//   right        → accept the whole suggestion
@@ -181,53 +180,61 @@ class BashInlineEditor extends CustomEditor {
 			return out;
 		}
 		const head = row.slice(0, match.index);
-		const ghost = this.activeGhost();
-		if (ghost) {
-			// Base row layout: text + cursor cell + padding. Drop the cursor
-			// cell (frees 1 col) and render ghost chars into the padding.
+		const ch = match[1] || " ";
+		if (this.tui.getShowHardwareCursor()) {
+			// Native terminal cursor mode: strip the fake block so the real
+			// blinking bar is the only cursor. It overlays the cell edge
+			// without covering the character, and it rides the first ghost
+			// character on suggestion rows.
+			const ghost = this.activeGhost();
+			if (!ghost) {
+				// Empty cursor cell: the native bar blinks there, nothing covered.
+				out[rowIdx] = head + ch + row.slice(match.index + match[0].length);
+				return out;
+			}
+			// The ghost starts AT the cursor cell so the native bar overlays
+			// its first character (Apple Terminal bar-cursor behavior) instead
+			// of sitting in a gap cell.
 			const remainder = ghost.suggestion.slice(ghost.typed.length);
 			const pad = / *$/.exec(row.slice(match.index + match[0].length))?.[0].length ?? 0;
 			const avail = pad + 1;
 			let used = 0;
-			const cells: string[] = [];
-			for (const ch of [...remainder]) {
-				const w = visibleWidth(ch);
+			const ghostCells: string[] = [];
+			for (const g of [...remainder]) {
+				const w = visibleWidth(g);
 				if (used + w > avail) {
 					break;
 				}
-				// Blink "on": first suggestion char is bright (acts as the cursor)
-				cells.push(used === 0 && this.cursorOn ? `\x1b[1m${ch}${RESET}` : `${DIM}${ch}${RESET}`);
+				ghostCells.push(`${DIM}${g}${RESET}`);
 				used += w;
 			}
-			out[rowIdx] = head + cells.join("") + " ".repeat(Math.max(0, pad - used + 1));
+			out[rowIdx] = head + ghostCells.join("") + " ".repeat(Math.max(0, pad - used + 1));
 			return out;
 		}
-		const ch = match[1] || " ";
-		// The beam only replaces empty cells — over a letter it would black
-		// the character out every other blink. Cursor over a letter instead
-		// renders that letter underlined while visible (zsh bar cursors draw
-		// the bar in the same cell; a terminal grid can't, so underline wins).
-		const cursorCell = this.cursorOn ? (ch === " " ? BEAM : `\x1b[4m${ch}${RESET}`) : ch;
-		out[rowIdx] = head + cursorCell + row.slice(match.index + match[0].length);
+		const ghost = this.activeGhost();
+		if (ghost) {
+			// Fallback (software blink): ghost chars fill the padding.
+			const remainder = ghost.suggestion.slice(ghost.typed.length);
+			const pad = / *$/.exec(row.slice(match.index + match[0].length))?.[0].length ?? 0;
+			const avail = pad + 1;
+			let used = 0;
+			const ghostCells: string[] = [];
+			for (const g of [...remainder]) {
+				const w = visibleWidth(g);
+				if (used + w > avail) {
+					break;
+				}
+				ghostCells.push(`${DIM}${g}${RESET}`);
+				used += w;
+			}
+			out[rowIdx] = head + BEAM + ghostCells.join("") + " ".repeat(Math.max(0, pad - used));
+			return out;
+		}
+		out[rowIdx] = head + BEAM + row.slice(match.index + match[0].length);
 		return out;
 	}
 
 	// --- internals ---
-
-	/** Toggle the beam cursor while focused; solid briefly after keystrokes. */
-	private startBlink(): void {
-		if (this.blinkTimer) {
-			return;
-		}
-		this.blinkTimer = setInterval(() => {
-			if (!this.focused) {
-				return;
-			}
-			const idle = Date.now() - this.lastInputAt > SOLID_AFTER_INPUT_MS;
-			this.cursorOn = idle ? !this.cursorOn : true;
-			this.tui.requestRender();
-		}, BLINK_INTERVAL_MS);
-	}
 
 	private inBashMode(): boolean {
 		return this.getText().trimStart().startsWith("!");
