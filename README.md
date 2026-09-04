@@ -90,8 +90,11 @@ The editor's fake block cursor is replaced by your terminal's **native blinking
 bar cursor** — the same behavior as Apple Terminal's bar style: it overlays the
 cell edge without ever covering the character, blinks on its own, and pauses
 blinking while you type. On ghost rows the bar rides the suggestion's first
-character. The extension requests the blinking-bar shape via `DECSCUSR`
-(`CSI 5 q`); terminals without that escape use their profile's cursor shape.
+character. The extension forces the cursor **white** (OSC 12) and requests the
+blinking-bar shape (DECSCUSR `CSI 5 q`) so it doesn't inherit the terminal
+theme's cursor color; both are restored to your terminal's defaults when pi
+exits. If blinking stays off (e.g. Warp), check the terminal's own cursor-blink
+setting (Warp: Settings → Appearance → Cursor → Blinking).
 A software beam cursor is kept as a fallback if the hardware cursor is
 unavailable.
 

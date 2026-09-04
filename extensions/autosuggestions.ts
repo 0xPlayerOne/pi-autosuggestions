@@ -61,9 +61,12 @@ class BashInlineEditor extends CustomEditor {
 		super(tui, theme, keybindings);
 		// Native terminal cursor = the Apple-Terminal-style blinking bar: it
 		// draws over the glyph's cell edge without covering the character.
-		// DECSCUSR 5 q requests a blinking bar where the terminal supports
-		// it; otherwise the terminal profile's cursor shape is used as-is.
+		// - DECSCUSR 5 q: blinking bar shape (Warp honors this).
+		// - OSC 12: force the cursor color white — terminals like Warp paint
+		//   the native cursor with the theme's color (often blue), which we
+		//   don't control from the theme.
 		tui.setShowHardwareCursor(true);
+		tui.terminal.write("\x1b]12;#ffffff\x1b\\");
 		tui.terminal.write("\x1b[5 q");
 		// Wrap onChange so programmatic text changes (paste, undo, history,
 		// setText) also refresh the inline suggestion.
@@ -535,5 +538,14 @@ class BashInlineEditor extends CustomEditor {
 export default function (pi: ExtensionAPI): void {
 	pi.on("session_start", (_event, ctx) => {
 		ctx.ui.setEditorComponent((tui, theme, keybindings) => new BashInlineEditor(tui, theme, keybindings));
+	});
+	// Restore the terminal's own cursor color and shape when pi exits so the
+	// shell afterwards isn't left with our forced white bar.
+	process.on("exit", () => {
+		try {
+			process.stdout.write("\x1b]104;12\x1b\\\x1b[0 q");
+		} catch {
+			// terminal gone — nothing to restore
+		}
 	});
 }
