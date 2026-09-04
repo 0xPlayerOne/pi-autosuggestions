@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.2](https://github.com/0xPlayerOne/pi-autosuggestions/compare/pi-autosuggestions-v0.2.1...pi-autosuggestions-v0.2.2) (2026-09-04)
+
+
+### Documentation
+
+* correct pinned release tag format in install instructions ([e936ed4](https://github.com/0xPlayerOne/pi-autosuggestions/commit/e936ed4001a9e73e0e1f0a8cea54c5d0fef47c36))
+
 ## [0.2.1](https://github.com/0xPlayerOne/pi-autosuggestions/compare/pi-autosuggestions-v0.2.0...pi-autosuggestions-v0.2.1) (2026-09-04)
 
 
