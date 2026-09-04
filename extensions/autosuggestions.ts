@@ -20,7 +20,8 @@ import {
 } from "@earendil-works/pi-tui";
 
 /** Runtime access to Editor internals that are private in the type declarations. */
-import { readdirSync, statSync } from "node:fs";
+import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
+import { dirname } from "node:path";
 import type { AutocompleteItem } from "@earendil-works/pi-tui";
 
 interface EditorInternals {
@@ -34,6 +35,8 @@ interface EditorInternals {
 
 const DIM = "\x1b[2m";
 const RESET = "\x1b[0m";
+/** Set at extension load; used for dynamic completion exec calls. */
+let execApi: ExtensionAPI | undefined;
 /** Beam cursor: thin vertical bar, bold so it stands out. One cell wide. */
 const BEAM = "\x1b[1m▏\x1b[0m";
 /** Matches the reverse-video block the base renderer emits for the cursor. */
@@ -103,7 +106,76 @@ const SUBCOMMANDS: Record<string, string[]> = {
 		"extension", "gist", "gpg-key", "issue", "label", "org", "pr", "project", "release",
 		"repo", "run", "search", "secret", "ssh-key", "status", "variable", "workflow",
 	],
+	go: [
+		"bug", "build", "clean", "doc", "env", "fix", "fmt", "generate", "get", "help",
+		"install", "list", "mod", "run", "test", "tool", "version", "vet", "work",
+	],
+	uv: [
+		"add", "build", "cache", "export", "help", "init", "lock", "pip", "publish", "python",
+		"remove", "run", "self", "sync", "tool", "tree", "venv", "version",
+	],
+	pip: [
+		"cache", "check", "config", "debug", "download", "freeze", "hash", "index", "inspect",
+		"install", "list", "show", "uninstall", "wheel",
+	],
+	poetry: [
+		"add", "build", "cache", "check", "config", "env", "export", "init", "install",
+		"list", "lock", "new", "publish", "remove", "run", "search", "self", "shell",
+		"show", "source", "update", "version",
+	],
+	terraform: [
+		"apply", "console", "destroy", "fmt", "get", "graph", "import", "init", "output",
+		"plan", "providers", "refresh", "show", "state", "taint", "test", "untaint",
+		"validate", "version", "workspace",
+	],
+	helm: [
+		"completion", "create", "dependency", "env", "get", "help", "history", "install",
+		"lint", "list", "package", "plugin", "pull", "push", "registry", "repo", "rollback",
+		"search", "show", "status", "template", "test", "uninstall", "upgrade", "verify",
+	],
+	wrangler: [
+		"ai", "d1", "delete", "deploy", "dev", "dispatch", "init", "kv", "login", "logout",
+		"logs", "r2", "rollback", "secret", "subdomain", "tail", "triggers", "types",
+		"versions", "whoami",
+	],
+	vercel: [
+		"alias", "build", "deploy", "dev", "dns", "domains", "env", "init", "inspect",
+		"link", "login", "logout", "logs", "ls", "projects", "pull", "remove", "switch",
+		"teams", "telemetry", "whoami",
+	],
+	mise: [
+		"activate", "current", "deactivate", "doctor", "exec", "global", "install", "link",
+		"list", "local", "ls", "outdated", "prune", "reshim", "run", "settings", "tasks",
+		"uninstall", "upgrade", "use", "which",
+	],
+	asdf: [
+		"current", "exec", "global", "info", "install", "latest", "list", "list-all",
+		"local", "plugin", "reshim", "shell", "uninstall", "update", "version", "where",
+		"which",
+	],
+	systemctl: [
+		"cat", "disable", "enable", "is-active", "is-enabled", "isolate", "kill", "list",
+		"list-dependencies", "list-timers", "list-units", "mask", "reload", "reload-or-restart",
+		"restart", "set-default", "show", "start", "status", "stop", "unmask",
+	],
+	apt: [
+		"autoclean", "autopurge", "autoremove", "build-dep", "cache", "check", "clean",
+		"download", "edit-sources", "full-upgrade", "help", "install", "list", "purge",
+		"reinstall", "remove", "satisfy", "search", "show", "source", "update", "upgrade",
+	],
+	pacman: [
+		"-Q", "-R", "-S", "-T", "-U", "-F", "clean", "deps", "files", "help", "query",
+		"remove", "sync", "test", "upgrade", "version",
+	],
 };
+
+const COMPOSE_SUBCOMMANDS = [
+	"build", "config", "create", "down", "events", "exec", "images", "kill", "logs", "ls",
+	"pause", "port", "ps", "pull", "push", "restart", "rm", "run", "start", "stop", "top",
+	"unpause", "up", "version", "wait", "watch",
+];
+
+// (SUBCOMMANDS gains more tables below — see SUBCOMMANDS_EXTRA merge point.)
 
 const BLINK_INTERVAL_MS = 500;
 /** Cursor stays solid for this long after each keystroke, then resumes blinking. */
@@ -377,6 +449,117 @@ class BashInlineEditor extends CustomEditor {
 			.slice(0, 100);
 	}
 
+	private dynCache = new Map<string, { at: number; data: string[] }>();
+
+	private cached(key: string, ttl: number, fetch: () => Promise<string[]>): Promise<string[]> {
+		const hit = this.dynCache.get(key);
+		if (hit && Date.now() - hit.at < ttl) {
+			return hit.data;
+		}
+		return fetch()
+			.then((data) => {
+				this.dynCache.set(key, { at: Date.now(), data });
+				return data;
+			})
+			.catch(() => []);
+	}
+
+	private async runCommand(cmd: string, args: string[], timeout = 4000): Promise<string[]> {
+		if (!execApi) {
+			return [];
+		}
+		const result = await execApi.exec(cmd, args, { cwd: process.cwd(), timeout });
+		if (result.code !== 0) {
+			return [];
+		}
+		return result.stdout.split("\n").map((l) => l.trim()).filter(Boolean);
+	}
+
+	private findUp(name: string): string | null {
+		let dir = process.cwd();
+		for (;;) {
+			const candidate = `${dir}/${name}`;
+			if (existsSync(candidate)) {
+				return candidate;
+			}
+			const parent = dirname(dir);
+			if (parent === dir) {
+				return null;
+			}
+			dir = parent;
+		}
+	}
+
+	private gitBranches(): Promise<string[]> {
+		return this.cached("git:branches", 10_000, async () =>
+			(await this.runCommand("git", ["branch", "--list"]))
+				.map((l) => l.replace(/^\*?\s*/, ""))
+				.filter((l) => l && !l.includes(" ")));
+	}
+
+	private npmScripts(): Promise<string[]> {
+		return this.cached("npm:scripts", 10_000, async () => {
+			const pkg = this.findUp("package.json");
+			if (!pkg) {
+				return [];
+			}
+			const parsed: { scripts?: Record<string, string> } = JSON.parse(readFileSync(pkg, "utf8"));
+			return Object.keys(parsed.scripts ?? {});
+		});
+	}
+
+	private makeTargets(): Promise<string[]> {
+		return this.cached("make:targets", 10_000, async () => {
+			const file = this.findUp("Makefile") ?? this.findUp("makefile");
+			if (!file) {
+				return [];
+			}
+			const targets = new Set<string>();
+			for (const line of readFileSync(file, "utf8").split("\n")) {
+				const m = /^([a-zA-Z0-9][^\s=$#]*(?:\s+[a-zA-Z0-9][^\s=$#]*)?):(?!=)/.exec(line);
+				if (m) {
+					for (const t of m[1]!.trim().split(/\s+/)) {
+						targets.add(t);
+					}
+				}
+			}
+			return [...targets];
+		});
+	}
+
+	/** Live sources: git branches, package scripts, make targets, compose. */
+	private async dynamicCompletions(
+		cmd: string,
+		args: string[],
+		token: string,
+	): Promise<{ items: string[]; description: string } | null> {
+		let items: string[] | null = null;
+		let description = "";
+		if (cmd === "git" && args.length === 1 && ["checkout", "switch", "merge", "rebase"].includes(args[0]!)) {
+			items = (await this.gitBranches()).filter((b) => b.startsWith(token));
+			description = "branch";
+		} else if (cmd === "git" && args[0] === "branch" && args.length === 1) {
+			items = (await this.gitBranches()).filter((b) => b.startsWith(token));
+			description = "branch";
+		} else if (
+			["npm", "pnpm", "yarn", "bun"].includes(cmd) &&
+			((args[0] === "run" && args.length === 1) || (cmd !== "npm" && args.length === 0))
+		) {
+			items = (await this.npmScripts()).filter((sc) => sc.startsWith(token));
+			description = "script";
+		} else if ((cmd === "make" || cmd === "gmake") && args.length === 0) {
+			items = (await this.makeTargets()).filter((t) => t.startsWith(token));
+			description = "make target";
+		} else if (cmd === "docker" && args[0] === "compose" && args.length === 1) {
+			items = COMPOSE_SUBCOMMANDS.filter((sc) => sc.startsWith(token));
+			description = "compose subcommand";
+		}
+		if (!items || items.length === 0) {
+			return null;
+		}
+		return { items: items.slice(0, 50), description };
+	}
+
 	private createBashProvider(current: AutocompleteProvider): AutocompleteProvider {
 		const self = this;
 		return {
@@ -392,21 +575,32 @@ class BashInlineEditor extends CustomEditor {
 					const cmd = arg[1]!;
 					const token = arg[2] ?? "";
 					const subs = SUBCOMMANDS[cmd];
-					if (subs) {
-						const matches = subs
-							.filter((sc) => sc.startsWith(token))
-							.slice(0, 50);
-						if (matches.length > 0) {
-							return {
-								items: matches.map((sc) => ({
-									value: sc,
-									label: sc,
-									description: `${cmd} subcommand`,
-								})),
-								prefix: token,
-							};
-						}
-						// No subcommand matches the prefix: fall through to paths.
+					const staticMatches = (subs ?? []).filter((sc) => sc.startsWith(token)).slice(0, 50);
+					const dynamic = await self.dynamicCompletions(cmd, [], token);
+					const dynamicItems = dynamic?.items.filter((d) => !staticMatches.includes(d)) ?? [];
+					if (staticMatches.length > 0 || dynamicItems.length > 0) {
+						return {
+							items: [
+								...staticMatches.map((sc) => ({ value: sc, label: sc, description: `${cmd} subcommand` })),
+								...dynamicItems.map((sc) => ({ value: sc, label: sc, description: dynamic!.description })),
+							],
+							prefix: token,
+						};
+					}
+					// Nothing matched: fall through to paths.
+				}
+				// Second-argument dynamic completion (branches, scripts, compose…).
+				const words = before.replace(/^[\t ]*!+/, "").split(/[ \t]+/);
+				if (words.length >= 2) {
+					const cmd = words[0]!;
+					const token = words[words.length - 1]!;
+					const args = words.slice(1, -1).filter(Boolean);
+					const dyn = await self.dynamicCompletions(cmd, args, token);
+					if (dyn && dyn.items.length > 0) {
+						return {
+							items: dyn.items.map((sc) => ({ value: sc, label: sc, description: dyn.description })),
+							prefix: token,
+						};
 					}
 				}
 				let queryLines = lines;
@@ -626,6 +820,7 @@ class BashInlineEditor extends CustomEditor {
 }
 
 export default function (pi: ExtensionAPI): void {
+	execApi = pi;
 	pi.on("session_start", (_event, ctx) => {
 		ctx.ui.setEditorComponent((tui, theme, keybindings) => new BashInlineEditor(tui, theme, keybindings));
 	});

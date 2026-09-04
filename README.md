@@ -64,8 +64,22 @@ subcommand table instead of the filesystem:
 | `!git zz` | no subcommand match → falls back to path completion |
 
 Covered commands: `git`, `npm`, `pnpm`, `yarn`, `bun`, `docker`, `kubectl`,
-`cargo`, `brew`, `gh`. Deeper arguments (branch names, flags, file args)
-still complete from history or the filesystem.
+`cargo`, `brew`, `gh`, `go`, `uv`, `pip`, `poetry`, `terraform`, `helm`,
+`wrangler`, `vercel`, `mise`, `asdf`, `systemctl`, `apt`, `pacman`.
+Deeper arguments (flags, file args) still complete from history or the
+filesystem.
+
+### Dynamic completions (bash mode)
+
+Some completions are **live** — the extension reads your project instead of a
+static table (results cached for 10s):
+
+| Input | Source |
+|-------|--------|
+| `!git checkout f` / `!git switch` / `!git merge` / `!git rebase` | branch names from `git branch` |
+| `!npm run d` / `!pnpm run` / `!bun d` (implicit for yarn/pnpm/bun) | `scripts` from the nearest `package.json` |
+| `!make d` | targets parsed from the nearest `Makefile` |
+| `!docker compose u` | compose subcommands |
 
 ### Command completion (bash mode)
 
