@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.0](https://github.com/0xPlayerOne/pi-autosuggestions/compare/pi-autosuggestions-v0.3.3...pi-autosuggestions-v0.4.0) (2026-09-04)
+
+
+### Features
+
+* subcommand completion for common bash commands ([3b17e1c](https://github.com/0xPlayerOne/pi-autosuggestions/commit/3b17e1cc5c6ee0ef92b5f2f564a9f8a7ce896411))
+
 ## [0.3.3](https://github.com/0xPlayerOne/pi-autosuggestions/compare/pi-autosuggestions-v0.3.2...pi-autosuggestions-v0.3.3) (2026-09-04)
 
 
