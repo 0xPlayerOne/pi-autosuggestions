@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.4](https://github.com/0xPlayerOne/pi-autosuggestions/compare/pi-autosuggestions-v0.2.3...pi-autosuggestions-v0.2.4) (2026-09-04)
+
+
+### CI
+
+* route releases through code-foundry ([2747d07](https://github.com/0xPlayerOne/pi-autosuggestions/commit/2747d07ba79a33c77bbca3c0f6fd1228eaeb3298))
+
 ## [0.2.3](https://github.com/0xPlayerOne/pi-autosuggestions/compare/pi-autosuggestions-v0.2.2...pi-autosuggestions-v0.2.3) (2026-09-04)
 
 
