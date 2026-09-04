@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.5.0](https://github.com/0xPlayerOne/pi-autosuggestions/compare/pi-autosuggestions-v0.4.0...pi-autosuggestions-v0.5.0) (2026-09-04)
+
+
+### Features
+
+* dynamic completions and expanded command tables ([4e99186](https://github.com/0xPlayerOne/pi-autosuggestions/commit/4e991868049694c1f973bc8ab2069af433c8bf4c))
+
 ## [0.4.0](https://github.com/0xPlayerOne/pi-autosuggestions/compare/pi-autosuggestions-v0.3.3...pi-autosuggestions-v0.4.0) (2026-09-04)
 
 
