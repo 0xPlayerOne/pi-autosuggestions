@@ -21,5 +21,11 @@
   "peerDependencies": {
     "@earendil-works/pi-coding-agent": "*",
     "@earendil-works/pi-tui": "*"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/0xPlayerOne/pi-autosuggestions.git"
+  },
+  "homepage": "https://github.com/0xPlayerOne/pi-autosuggestions#readme",
+  "bugs": "https://github.com/0xPlayerOne/pi-autosuggestions/issues"
 }
