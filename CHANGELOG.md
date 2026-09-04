@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.3](https://github.com/0xPlayerOne/pi-autosuggestions/compare/pi-autosuggestions-v0.2.2...pi-autosuggestions-v0.2.3) (2026-09-04)
+
+
+### CI
+
+* test code-foundry reusable workflow call (diagnostic) ([1316ff9](https://github.com/0xPlayerOne/pi-autosuggestions/commit/1316ff92b6d650d8985520cbb2544fc21651d714))
+
 ## [0.2.2](https://github.com/0xPlayerOne/pi-autosuggestions/compare/pi-autosuggestions-v0.2.1...pi-autosuggestions-v0.2.2) (2026-09-04)
 
 
