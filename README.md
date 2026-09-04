@@ -18,7 +18,7 @@ you see:   !cd Desktop/     ( dimmed "top/", first char is your blinking cursor 
 ```bash
 pi install git:github.com/0xPlayerOne/pi-autosuggestions
 # or pinned:
-pi install git:github.com/0xPlayerOne/pi-autosuggestions@v0.2.0
+pi install git:github.com/0xPlayerOne/pi-autosuggestions@pi-autosuggestions-v0.2.1
 # or from npm:
 pi install npm:pi-autosuggestions
 ```
