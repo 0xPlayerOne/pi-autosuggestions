@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.3](https://github.com/0xPlayerOne/pi-autosuggestions/compare/pi-autosuggestions-v0.3.2...pi-autosuggestions-v0.3.3) (2026-09-04)
+
+
+### Bug Fixes
+
+* force white blinking bar cursor in terminals with themed cursors ([20a3a24](https://github.com/0xPlayerOne/pi-autosuggestions/commit/20a3a2499cad2ec3a83e1c8d1edd0c96b6d6a2ee))
+
 ## [0.3.2](https://github.com/0xPlayerOne/pi-autosuggestions/compare/pi-autosuggestions-v0.3.1...pi-autosuggestions-v0.3.2) (2026-09-04)
 
 
