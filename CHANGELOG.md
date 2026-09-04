@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.1](https://github.com/0xPlayerOne/pi-autosuggestions/compare/pi-autosuggestions-v0.2.0...pi-autosuggestions-v0.2.1) (2026-09-04)
+
+
+### Bug Fixes
+
+* add repository metadata required for npm provenance ([cfddf8d](https://github.com/0xPlayerOne/pi-autosuggestions/commit/cfddf8d17f9f359b6f73ec9e0fb68b67748de0d6))
+
 ## [0.2.0](https://github.com/0xPlayerOne/pi-autosuggestions/compare/pi-autosuggestions-v0.1.0...pi-autosuggestions-v0.2.0) (2026-09-04)
 
 
