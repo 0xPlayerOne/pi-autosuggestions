@@ -1,5 +1,5 @@
 {
-	"name": "pi-bash-inline-completion",
+	"name": "pi-ghost",
 	"version": "0.1.0",
 	"description": "zsh-style inline ghost completion for bash mode (!commands) in the pi coding agent — with automatic dropdown fallback for multiple matches",
 	"keywords": ["pi-package", "pi", "autocomplete", "completions", "shell", "zsh"],

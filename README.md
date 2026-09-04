@@ -1,4 +1,4 @@
-# pi-bash-inline-completion
+# pi-ghost
 
 [zsh](https://www.zsh.org/)-style **inline ghost completion** for bash mode (`!command`) in the
 [pi coding agent](https://github.com/earendil-works/pi-mono).
@@ -23,13 +23,13 @@ stock editor behavior.
 ## Install
 
 ```bash
-pi install git:github.com/0xPlayerOne/pi-bash-inline-completion@v0.1.0
+pi install git:github.com/0xPlayerOne/pi-ghost@v0.1.0
 ```
 
 or from a local checkout:
 
 ```bash
-pi install /path/to/pi-bash-inline-completion
+pi install /path/to/pi-ghost
 ```
 
 ## Usage
