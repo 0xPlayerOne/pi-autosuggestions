@@ -23,6 +23,21 @@ pi install git:github.com/0xPlayerOne/pi-autosuggestions@pi-autosuggestions-v0.2
 pi install npm:pi-autosuggestions
 ```
 
+## Scope
+
+| Layer | Where it works |
+|-------|----------------|
+| History ghost suggestions | **Everywhere** — normal prompts and `!`/`!!` bash mode |
+| Path completion + dropdown | **Bash mode only** (`!`/`!!` commands) |
+| Command-name completion | **Bash mode only**, first word after `!` |
+| Beam cursor | **Everywhere** |
+
+History is **session-scoped**: the ghost can only suggest prompts you already
+submitted *in the current session* (pi has no persistent shell-history file
+across sessions yet). If you mostly run `!` commands, the ghost will mostly
+appear in bash mode — it isn't restricted there, it just has nothing to
+suggest elsewhere.
+
 ## Features
 
 ### zsh-autosuggestions behavior
@@ -36,6 +51,20 @@ pi install npm:pi-autosuggestions
   (`autosuggest-accept-word`), like zsh's default `alt+f` binding
 - **`Esc`** — dismiss the suggestion until your next edit
 - Suggestion hides when the cursor leaves end-of-line, returns when you come back
+
+### Command completion (bash mode)
+
+The first word after `!` completes against **executables on your `$PATH`** —
+like zsh's command position, no plugins needed:
+
+| Input | Result |
+|-------|--------|
+| `!gi` | dropdown — `git`, `gh`, `gimp`, … (marked `command`) |
+| `!whoa` | inline ghost `mi` → `whoami` |
+
+File paths that also match are listed after the commands. Per-command
+*subcommand* completion (`git st` → `status`) is zsh's `compdef` system and is
+out of scope — use history or type it.
 
 ### Path completion (fish/zsh-completion flavored)
 

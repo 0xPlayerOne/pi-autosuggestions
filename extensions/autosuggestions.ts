@@ -20,6 +20,9 @@ import {
 } from "@earendil-works/pi-tui";
 
 /** Runtime access to Editor internals that are private in the type declarations. */
+import { readdirSync, statSync } from "node:fs";
+import type { AutocompleteItem } from "@earendil-works/pi-tui";
+
 interface EditorInternals {
 	state: { lines: string[]; cursorLine: number; cursorCol: number };
 	autocompleteProvider?: AutocompleteProvider | null;
@@ -248,6 +251,52 @@ class BashInlineEditor extends CustomEditor {
 	 * The ghost-vs-dropdown split (one match → ghost, many → dropdown) is
 	 * decided in updateGhost(), which sees the final suggestion counts.
 	 */
+	/** Executable names on $PATH, cached for the session (zsh command completion). */
+	private pathCommandCache: string[] | null = null;
+
+	private getPathCommands(): string[] {
+		if (this.pathCommandCache) {
+			return this.pathCommandCache;
+		}
+		const names = new Set<string>();
+		for (const dir of (process.env.PATH ?? "").split(":")) {
+			if (!dir) {
+				continue;
+			}
+			let entries;
+			try {
+				entries = readdirSync(dir);
+			} catch {
+				continue;
+			}
+			for (const name of entries) {
+				if (names.has(name)) {
+					continue;
+				}
+				try {
+					// eslint-disable-next-line no-bitwise
+					if (statSync(`${dir}/${name}`).mode & 0o111) {
+						names.add(name);
+					}
+				} catch {
+					// dangling symlink or unreadable entry
+				}
+			}
+		}
+		this.pathCommandCache = [...names].sort();
+		return this.pathCommandCache;
+	}
+
+	/** PATH commands starting with the typed command word. */
+	private matchingCommands(word: string): string[] {
+		if (!word) {
+			return [];
+		}
+		return this.getPathCommands()
+			.filter((name) => name.startsWith(word))
+			.slice(0, 100);
+	}
+
 	private createBashProvider(current: AutocompleteProvider): AutocompleteProvider {
 		const self = this;
 		return {
@@ -257,26 +306,54 @@ class BashInlineEditor extends CustomEditor {
 				}
 				const before = (lines[cursorLine] ?? "").slice(0, cursorCol);
 				let queryLines = lines;
+				let commandItems: AutocompleteItem[] = [];
+				let word = "";
 				if (self.commandPosition(before)) {
-					// Neutralize the command word so the provider completes the
-					// (empty) argument position: every entry matches.
+					word = before.replace(/^[ \t]*!+/, "");
+					const commands = self.matchingCommands(word);
 					queryLines = [...lines];
-					queryLines[cursorLine] = before.replace(/![^!\s]*$/, "! ");
+					if (commands.length > 0) {
+						// The typed word is a prefix of real commands: offer them
+						// first, plus any matching file paths as fallback.
+						commandItems = commands.map((name) => ({
+							value: name,
+							label: name,
+							description: "command",
+						}));
+						queryLines[cursorLine] = `! ${word}`;
+					} else {
+						// Neutralize the command word so the provider completes the
+						// (empty) argument position: every entry matches.
+						queryLines[cursorLine] = before.replace(/![^!\s]*$/, "! ");
+					}
 				}
-				return current.getSuggestions(queryLines, cursorLine, cursorCol, {
+				const suggestions = await current.getSuggestions(queryLines, cursorLine, cursorCol, {
 					...options,
 					force: true,
 				});
+				if (commandItems.length === 0) {
+					return suggestions;
+				}
+				return {
+					items: [...commandItems, ...(suggestions?.items ?? [])],
+					prefix: word,
+				};
 			},
 
 			applyCompletion(lines, cursorLine, cursorCol, item, prefix) {
 				const before = (lines[cursorLine] ?? "").slice(0, cursorCol);
 				if (self.inBashMode() && self.commandPosition(before)) {
-					// Completing from the command position: insert the chosen path
-					// as the first argument ("!cd" + AppleStuff/ → "!cd AppleStuff/").
 					const value = item.value ?? "";
 					const line = lines[cursorLine] ?? "";
 					const newLines = [...lines];
+					if (item.description === "command") {
+						// Completing the command word itself ("!gi" + git → "!git").
+						const start = cursorCol - prefix.length;
+						newLines[cursorLine] = line.slice(0, start) + value + line.slice(cursorCol);
+						return { lines: newLines, cursorLine, cursorCol: start + value.length };
+					}
+					// Completing from the command position: insert the chosen path
+					// as the first argument ("!cd" + AppleStuff/ → "!cd AppleStuff/").
 					newLines[cursorLine] = `${line.slice(0, cursorCol)} ${value}${line.slice(cursorCol)}`;
 					return { lines: newLines, cursorLine, cursorCol: cursorCol + 1 + value.length };
 				}
@@ -336,7 +413,8 @@ class BashInlineEditor extends CustomEditor {
 		if (!value || !value.toLowerCase().startsWith(token.toLowerCase())) {
 			return null;
 		}
-		const separator = this.commandPosition(before) ? " " : "";
+		const isCommand = suggestions?.items[0]?.description === "command";
+		const separator = isCommand ? "" : (this.commandPosition(before) ? " " : "");
 		const suggestion = before.slice(0, before.length - token.length) + separator + value;
 		if (suggestion.length <= before.length) {
 			return null;
