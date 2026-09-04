@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.0](https://github.com/0xPlayerOne/pi-autosuggestions/compare/pi-autosuggestions-v0.2.4...pi-autosuggestions-v0.3.0) (2026-09-04)
+
+
+### Features
+
+* command-name completion from PATH at the bash command position ([9b4eef6](https://github.com/0xPlayerOne/pi-autosuggestions/commit/9b4eef62c780979fc972cb2d304eeefe8fd98db7))
+
 ## [0.2.4](https://github.com/0xPlayerOne/pi-autosuggestions/compare/pi-autosuggestions-v0.2.3...pi-autosuggestions-v0.2.4) (2026-09-04)
 
 
