@@ -26,7 +26,7 @@ cache_build: auto
 coverage_minimum: 80
 turbo_remote: auto
 release_type: node
-npm_publish: false
+npm_publish: true
 post_release: false
 post_release_workflow:
 post_release_mode: auto
