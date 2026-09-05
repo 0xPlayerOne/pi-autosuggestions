@@ -13,10 +13,9 @@
 
 ## [0.6.3](https://github.com/0xPlayerOne/pi-autosuggestions/compare/pi-autosuggestions-v0.6.2...pi-autosuggestions-v0.6.3) (2026-09-05)
 
-
 ### Maintenance
 
-* **ci:** adopt code-foundry v0.40.2 runtime ([df4f46c](https://github.com/0xPlayerOne/pi-autosuggestions/commit/df4f46c48431d4f3655a8a2f5ed28a383cafb8d1))
+- **ci:** adopt code-foundry v0.40.2 runtime ([df4f46c](https://github.com/0xPlayerOne/pi-autosuggestions/commit/df4f46c48431d4f3655a8a2f5ed28a383cafb8d1))
 
 ## [0.6.2](https://github.com/0xPlayerOne/pi-autosuggestions/compare/pi-autosuggestions-v0.6.1...pi-autosuggestions-v0.6.2) (2026-09-05)
 
