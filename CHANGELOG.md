@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.6.0](https://github.com/0xPlayerOne/pi-autosuggestions/compare/pi-autosuggestions-v0.5.0...pi-autosuggestions-v0.6.0) (2026-09-05)
+
+
+### Features
+
+* cross-session history, candidate cycling, theme-aware cursor, new dynamic sources ([71fe236](https://github.com/0xPlayerOne/pi-autosuggestions/commit/71fe236ac272d54432da96aa35e53a919102f657))
+
 ## [0.5.0](https://github.com/0xPlayerOne/pi-autosuggestions/compare/pi-autosuggestions-v0.4.0...pi-autosuggestions-v0.5.0) (2026-09-04)
 
 
