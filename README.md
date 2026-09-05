@@ -49,8 +49,9 @@ to suggest elsewhere.
 **Candidate cycling**: with multiple history matches, `Alt+Down` / `Alt+Up`
 rotate the ghost through the alternatives (most recent first).
 
-The cursor colors follow the **pi theme** (accent while "on", dim while
-"off"), so they stay visible on light and dark themes.
+The cursor is the **terminal's native one** (see the cursor section below):
+white in terminals honoring OSC 12, theme-colored elsewhere — notably Warp
+paints it blue and ignores cursor-color overrides (warpdotdev/Warp#3210).
 
 ## Features
 

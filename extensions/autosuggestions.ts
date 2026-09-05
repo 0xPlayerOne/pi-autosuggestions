@@ -39,7 +39,6 @@ const RESET = "\x1b[0m";
 /** Set at extension load; used for dynamic completion exec calls. */
 let execApi: ExtensionAPI | undefined;
 /** Active pi theme (set at session start) for theme-aware cursor colors. */
-let themeRef: { fg(name: string, text: string): string } | undefined;
 /** Persisted extension settings (~/.pi/agent/pi-autosuggestions.json). */
 interface AutosuggestConfig {
 	crossSessionHistory?: boolean;
@@ -435,16 +434,7 @@ class BashInlineEditor extends CustomEditor {
 		return st.cursorCol === (st.lines[st.cursorLine] ?? "").length;
 	}
 
-	/** Theme-aware styles; fall back to white/dim when no theme is set. */
-	private bright(text: string): string {
-		return themeRef ? themeRef.fg("accent", text) : `${CURSOR_COLOR}${text}${RESET}`;
-	}
-
-	private dimmed(text: string): string {
-		return themeRef ? themeRef.fg("dim", text) : `${DIM}${text}${RESET}`;
-	}
-
-	/** Suppress the dropdown in bash mode unless the popup is already open. */
+		/** Suppress the dropdown in bash mode unless the popup is already open. */
 
 	/**
 	 * True while the command word after "!" is still being typed (no space
@@ -997,7 +987,6 @@ export default function (pi: ExtensionAPI): void {
 	execApi = pi;
 	loadConfig();
 	pi.on("session_start", (_event, ctx) => {
-		themeRef = ctx.ui.theme;
 		ctx.ui.setEditorComponent((tui, theme, keybindings) => new BashInlineEditor(tui, theme, keybindings));
 	});
 	pi.registerCommand("autosuggest", {
