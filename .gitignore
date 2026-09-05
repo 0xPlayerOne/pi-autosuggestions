@@ -1,0 +1,77 @@
+# Operating system
+.DS_Store
+Thumbs.db
+.Trashes
+
+# Secrets and local environment
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# JavaScript and TypeScript
+node_modules/
+.pnp/
+.pnp.js
+.turbo/
+*.tsbuildinfo
+next-env.d.ts
+
+# Python
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# Rust
+target/
+
+# Build and test output
+dist/
+build/
+out/
+coverage/
+htmlcov/
+.coverage*
+.next/
+artifacts/
+cache/
+!.github/actions/cache/
+!.github/actions/cache/action.yml
+typechain/
+coverage.json
+tests/.bin/
+**/.app/
+
+# Logs and temporary files
+*.log
+*.tmp
+*.pid
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+
+# Editors, agents, and local tools
+.claude/
+.kilo/
+.codex/
+.cursor/
+.windsurf/
+.vscode/
+.idea/
+.zed/
+.fleet/
+.opencode/
+.kluster/
+.direnv/
+.envrc
+.vercel/
+mise.local.toml
+.mise.local.toml
+mise.local.lock
+.mise.local.lock
+*.code-workspace

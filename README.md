@@ -31,12 +31,12 @@ Default: off (history is session-scoped).
 
 ## Scope
 
-| Layer | Where it works |
-|-------|----------------|
-| History ghost suggestions | **Everywhere** — normal prompts and `!`/`!!` bash mode |
-| Path completion + dropdown | **Bash mode only** (`!`/`!!` commands) |
-| Command-name completion | **Bash mode only**, first word after `!` |
-| Beam cursor | **Everywhere** |
+| Layer                      | Where it works                                         |
+| -------------------------- | ------------------------------------------------------ |
+| History ghost suggestions  | **Everywhere** — normal prompts and `!`/`!!` bash mode |
+| Path completion + dropdown | **Bash mode only** (`!`/`!!` commands)                 |
+| Command-name completion    | **Bash mode only**, first word after `!`               |
+| Beam cursor                | **Everywhere**                                         |
 
 History is **session-scoped by default**: the ghost suggests prompts you
 submitted in the current session. Opt into **cross-session history** with
@@ -72,11 +72,11 @@ paints it blue and ignores cursor-color overrides (warpdotdev/Warp#3210).
 For well-known commands the **first argument** completes from a built-in
 subcommand table instead of the filesystem:
 
-| Input | Result |
-|-------|--------|
-| `!git s` | dropdown — `show`, `stash`, `status`, … (marked `git subcommand`) |
-| `!git statu` | inline ghost `s` → `status` |
-| `!git zz` | no subcommand match → falls back to path completion |
+| Input        | Result                                                            |
+| ------------ | ----------------------------------------------------------------- |
+| `!git s`     | dropdown — `show`, `stash`, `status`, … (marked `git subcommand`) |
+| `!git statu` | inline ghost `s` → `status`                                       |
+| `!git zz`    | no subcommand match → falls back to path completion               |
 
 Covered commands: `git`, `npm`, `pnpm`, `yarn`, `bun`, `docker`, `kubectl`,
 `cargo`, `brew`, `gh`, `go`, `uv`, `pip`, `poetry`, `terraform`, `helm`,
@@ -89,40 +89,40 @@ filesystem.
 Some completions are **live** — the extension reads your project instead of a
 static table (results cached for 10s):
 
-| Input | Source |
-|-------|--------|
-| `!git checkout f` / `!git switch` / `!git merge` / `!git rebase` | branch names from `git branch` |
-| `!npm run d` / `!pnpm run` / `!bun d` (implicit for yarn/pnpm/bun) | `scripts` from the nearest `package.json` |
-| `!make d` | targets parsed from the nearest `Makefile` |
-| `!docker compose u` | compose subcommands |
-| `!docker start n` / `logs` / `exec` … | running container names |
-| `!kubectl get p` | resource types |
-| `!ssh ` / `!scp ` | hosts from `~/.ssh/config` |
+| Input                                                              | Source                                     |
+| ------------------------------------------------------------------ | ------------------------------------------ |
+| `!git checkout f` / `!git switch` / `!git merge` / `!git rebase`   | branch names from `git branch`             |
+| `!npm run d` / `!pnpm run` / `!bun d` (implicit for yarn/pnpm/bun) | `scripts` from the nearest `package.json`  |
+| `!make d`                                                          | targets parsed from the nearest `Makefile` |
+| `!docker compose u`                                                | compose subcommands                        |
+| `!docker start n` / `logs` / `exec` …                              | running container names                    |
+| `!kubectl get p`                                                   | resource types                             |
+| `!ssh ` / `!scp `                                                  | hosts from `~/.ssh/config`                 |
 
 ### Command completion (bash mode)
 
 The first word after `!` completes against **executables on your `$PATH`** —
 like zsh's command position, no plugins needed:
 
-| Input | Result |
-|-------|--------|
-| `!gi` | dropdown — `git`, `gh`, `gimp`, … (marked `command`) |
-| `!whoa` | inline ghost `mi` → `whoami` |
+| Input   | Result                                               |
+| ------- | ---------------------------------------------------- |
+| `!gi`   | dropdown — `git`, `gh`, `gimp`, … (marked `command`) |
+| `!whoa` | inline ghost `mi` → `whoami`                         |
 
 File paths that also match are listed after the commands. Per-command
-*subcommand* completion (`git st` → `status`) is zsh's `compdef` system and is
+_subcommand_ completion (`git st` → `status`) is zsh's `compdef` system and is
 out of scope — use history or type it.
 
 ### Path completion (fish/zsh-completion flavored)
 
 In bash mode (`!command`), a second strategy completes **filesystem paths**:
 
-| Input | Result |
-|-------|--------|
-| `!cd` | dropdown — all entries |
-| `!cd D` | dropdown — filtered to `D*` |
-| `!cd Dow` | inline ghost `nloads/` |
-| `→` / `Tab` | accept |
+| Input              | Result                                                   |
+| ------------------ | -------------------------------------------------------- |
+| `!cd`              | dropdown — all entries                                   |
+| `!cd D`            | dropdown — filtered to `D*`                              |
+| `!cd Dow`          | inline ghost `nloads/`                                   |
+| `→` / `Tab`        | accept                                                   |
 | accept a directory | immediately suggests its first entry (zsh-like chaining) |
 
 - **Command position aware** — `!cd` (no space yet) lists everything; picking an

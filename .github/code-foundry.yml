@@ -1,4 +1,40 @@
-# Code Foundry release profile (see 0xPlayerOne/code-foundry).
+version: 1
+profile: application
+languages: typescript
+features: all
+codeql: auto
+dependency_review: auto
+package_manager: npm
+codeql_rust_shards: '["all"]'
+codeql_rust_threads: 1
+codeql_rust_max_parallel: 1
+runtime_repository: 0xPlayerOne/code-foundry
+runtime_ref: v0.40.2
+runner: ubuntu-slim
+ci_runner: ubuntu-slim
+test_runner: ubuntu-slim
+unit_runner: ubuntu-slim
+security_runner: ubuntu-slim
+codeql_runner: ubuntu-latest
+pr_runner: ubuntu-slim
+release_runner: ubuntu-slim
+toolchain: auto
+staging_validation_mode: fast
+prune_standard: false
+cache_packages: auto
+cache_build: auto
+coverage_minimum: 80
+turbo_remote: auto
 release_type: node
-npm_publish: "true"
+npm_publish: false
+post_release: false
+post_release_workflow:
+post_release_mode: auto
+opencode_security: false
+opencode_security_model:
+sync_mode: overlay
+custom_workflows: preserve
+license: gpl-3.0-or-later
+git_workflow: direct
+merge_strategy: rebase
 release_merge_strategy: rebase

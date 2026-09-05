@@ -1,0 +1,90 @@
+name: Code Foundry
+
+on:
+  pull_request:
+    branches: [main]
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - ready_for_review
+  schedule:
+    - cron: "31 6 * * 1"
+  workflow_dispatch:
+
+# Default every caller job to no repository permissions. Individual jobs grant
+# only the scopes their own validation path consumes.
+permissions: {}
+
+# Superseded PR updates cancel the previous run; schedule and dispatch runs
+# are keyed by event so periodic audits and manual runs stay independent.
+concurrency:
+  group: code-foundry-validation-${{ github.event_name }}-${{ github.event.pull_request.head.repo.full_name || github.repository }}-${{ github.event.pull_request.head.ref || github.ref_name }}
+  cancel-in-progress: true
+
+jobs:
+  mode:
+    name: Mode
+    if: vars.CI_BILLING_PAUSED != 'true'
+    runs-on: ubuntu-slim
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    outputs:
+      mode: ${{ steps.classify.outputs.mode }}
+    steps:
+      # The runtime classifies policy from the consumer repository's config.
+      # Keep this checkout before the isolated runtime checkout below.
+      - name: Checkout consumer repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - name: Checkout runtime
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+          repository: 0xPlayerOne/code-foundry
+          ref: v0.40.2
+          path: .github/.code-foundry
+          sparse-checkout: |
+            src/lib
+            src/runtime.mjs
+      - name: Install runtime
+        run: mv .github/.code-foundry "$RUNNER_TEMP/code-foundry"
+      - name: Classify validation mode
+        id: classify
+        env:
+          FOUNDRY_EVENT_NAME: ${{ github.event_name }}
+          FOUNDRY_BASE_REF: ${{ github.event.pull_request.base.ref }}
+          FOUNDRY_HEAD_REF: ${{ github.event.pull_request.head.ref }}
+        run: node "$RUNNER_TEMP/code-foundry/src/runtime.mjs" validation mode >> "$GITHUB_OUTPUT"
+
+  # The stable aggregate check name is the caller job name plus the
+  # orchestrator gate job name: "Validation / Gate". Keep both names fixed.
+  validation:
+    name: Validation
+    needs: mode
+    if: vars.CI_BILLING_PAUSED != 'true'
+    # Reusable workflows can only maintain or reduce the caller job's scopes.
+    # The audit tier needs security-events: write for CodeQL uploads.
+    permissions:
+      actions: read
+      contents: read
+      packages: read
+      security-events: write
+    uses: 0xPlayerOne/code-foundry/.github/workflows/validation.yml@v0.40.2
+    with:
+      mode: ${{ needs.mode.outputs.mode }}
+      runtime-repository: 0xPlayerOne/code-foundry
+      runtime-ref: v0.40.2
+      ci-runner: ubuntu-slim
+      test-runner: ubuntu-slim
+      unit-runner: ubuntu-slim
+      security-runner: ubuntu-slim
+      codeql-runner: ubuntu-latest
+      rust-shards: '["all"]'
+      rust-threads: "1"
+      rust-max-parallel: 1
+    secrets:
+      TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+      NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
