@@ -13,6 +13,13 @@
   "license": "MIT",
   "author": "Andrew Mahoney-Fernandes <0xPlayerOne>",
   "type": "module",
+  "engines": {
+    "node": "^20.19.0 || ^22.12.0 || >=23"
+  },
+  "files": [
+    "extensions",
+    "README.md"
+  ],
   "pi": {
     "extensions": [
       "./extensions/*.ts"
