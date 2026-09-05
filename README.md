@@ -23,6 +23,12 @@ pi install git:github.com/0xPlayerOne/pi-autosuggestions@pi-autosuggestions-v0.2
 pi install npm:pi-autosuggestions
 ```
 
+## Configuration
+
+`/autosuggest` — toggle cross-session history for ghost suggestions (stored
+in `~/.pi/agent/pi-autosuggestions.json`; applies from the next session).
+Default: off (history is session-scoped).
+
 ## Scope
 
 | Layer | Where it works |
@@ -32,11 +38,19 @@ pi install npm:pi-autosuggestions
 | Command-name completion | **Bash mode only**, first word after `!` |
 | Beam cursor | **Everywhere** |
 
-History is **session-scoped**: the ghost can only suggest prompts you already
-submitted *in the current session* (pi has no persistent shell-history file
-across sessions yet). If you mostly run `!` commands, the ghost will mostly
-appear in bash mode — it isn't restricted there, it just has nothing to
-suggest elsewhere.
+History is **session-scoped by default**: the ghost suggests prompts you
+submitted in the current session. Opt into **cross-session history** with
+`/autosuggest` — the extension then seeds suggestions from your previous
+pi sessions in the same working directory (read from pi's own session files;
+nothing leaves your machine). If you mostly run `!` commands, the ghost will
+mostly appear in bash mode — it isn't restricted there, it just has nothing
+to suggest elsewhere.
+
+**Candidate cycling**: with multiple history matches, `Alt+Down` / `Alt+Up`
+rotate the ghost through the alternatives (most recent first).
+
+The cursor colors follow the **pi theme** (accent while "on", dim while
+"off"), so they stay visible on light and dark themes.
 
 ## Features
 
@@ -80,6 +94,9 @@ static table (results cached for 10s):
 | `!npm run d` / `!pnpm run` / `!bun d` (implicit for yarn/pnpm/bun) | `scripts` from the nearest `package.json` |
 | `!make d` | targets parsed from the nearest `Makefile` |
 | `!docker compose u` | compose subcommands |
+| `!docker start n` / `logs` / `exec` … | running container names |
+| `!kubectl get p` | resource types |
+| `!ssh ` / `!scp ` | hosts from `~/.ssh/config` |
 
 ### Command completion (bash mode)
 

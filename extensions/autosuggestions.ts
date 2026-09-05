@@ -20,8 +20,9 @@ import {
 } from "@earendil-works/pi-tui";
 
 /** Runtime access to Editor internals that are private in the type declarations. */
-import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
+import { existsSync, readFileSync, realpathSync, readdirSync, statSync, writeFileSync } from "node:fs";
 import { dirname } from "node:path";
+import { homedir } from "node:os";
 import type { AutocompleteItem } from "@earendil-works/pi-tui";
 
 interface EditorInternals {
@@ -37,6 +38,30 @@ const DIM = "\x1b[2m";
 const RESET = "\x1b[0m";
 /** Set at extension load; used for dynamic completion exec calls. */
 let execApi: ExtensionAPI | undefined;
+/** Active pi theme (set at session start) for theme-aware cursor colors. */
+let themeRef: { fg(name: string, text: string): string } | undefined;
+/** Persisted extension settings (~/.pi/agent/pi-autosuggestions.json). */
+interface AutosuggestConfig {
+	crossSessionHistory?: boolean;
+}
+let config: AutosuggestConfig = {};
+const configPath = `${homedir()}/.pi/agent/pi-autosuggestions.json`;
+
+function loadConfig(): void {
+	try {
+		config = JSON.parse(readFileSync(configPath, "utf8"));
+	} catch {
+		config = {};
+	}
+}
+
+function saveConfig(): void {
+	try {
+		writeFileSync(configPath, JSON.stringify(config, null, 2));
+	} catch {
+		// read-only home — settings stay in-memory
+	}
+}
 /** Beam cursor: thin vertical bar, bold so it stands out. One cell wide. */
 const BEAM = "\x1b[1m▏\x1b[0m";
 /** Matches the reverse-video block the base renderer emits for the cursor. */
@@ -177,6 +202,18 @@ const COMPOSE_SUBCOMMANDS = [
 
 // (SUBCOMMANDS gains more tables below — see SUBCOMMANDS_EXTRA merge point.)
 
+const DOCKER_CONTAINER_VERBS = [
+	"start", "stop", "restart", "kill", "rm", "logs", "exec", "inspect", "stats",
+	"top", "pause", "unpause", "commit",
+];
+
+const KUBECTL_RESOURCES = [
+	"pods", "po", "deployments", "deploy", "services", "svc", "ingresses", "ing",
+	"nodes", "no", "namespaces", "ns", "configmaps", "cm", "secrets", "persistentvolumes",
+	"pv", "persistentvolumeclaims", "pvc", "events", "ev", "replicasets", "rs",
+	"statefulsets", "sts", "daemonsets", "ds", "jobs", "cronjobs", "hpa", "endpoints", "ep",
+];
+
 const BLINK_INTERVAL_MS = 500;
 /** Cursor stays solid for this long after each keystroke, then resumes blinking. */
 const SOLID_AFTER_INPUT_MS = 450;
@@ -192,6 +229,10 @@ class BashInlineEditor extends CustomEditor {
 	private ghostAbort?: AbortController;
 	/** Submitted prompts, oldest first — the zsh-autosuggestions history strategy. */
 	private promptHistory: string[] = [];
+	private historyLoaded = false;
+	/** History candidates for the current ghost (most recent first). */
+	private ghostCandidates: string[] = [];
+	private ghostCandidateIndex = 0;
 	/** Set by Escape; keeps the ghost dismissed until the next text edit. */
 	private ghostSuppressed = false;
 
@@ -277,6 +318,14 @@ class BashInlineEditor extends CustomEditor {
 			}
 			if (matchesKey(data, "alt+f") || matchesKey(data, "ctrl+right")) {
 				this.acceptGhostWord();
+				return;
+			}
+			if (matchesKey(data, "alt+down")) {
+				this.cycleGhostCandidate(1);
+				return;
+			}
+			if (matchesKey(data, "alt+up")) {
+				this.cycleGhostCandidate(-1);
 				return;
 			}
 		}
@@ -384,6 +433,15 @@ class BashInlineEditor extends CustomEditor {
 	private cursorAtLineEnd(): boolean {
 		const st = (this as unknown as EditorInternals).state;
 		return st.cursorCol === (st.lines[st.cursorLine] ?? "").length;
+	}
+
+	/** Theme-aware styles; fall back to white/dim when no theme is set. */
+	private bright(text: string): string {
+		return themeRef ? themeRef.fg("accent", text) : `${CURSOR_COLOR}${text}${RESET}`;
+	}
+
+	private dimmed(text: string): string {
+		return themeRef ? themeRef.fg("dim", text) : `${DIM}${text}${RESET}`;
 	}
 
 	/** Suppress the dropdown in bash mode unless the popup is already open. */
@@ -528,6 +586,32 @@ class BashInlineEditor extends CustomEditor {
 	}
 
 	/** Live sources: git branches, package scripts, make targets, compose. */
+	private sshHosts(): Promise<string[]> {
+		return this.cached("ssh:hosts", 60_000, async () => {
+			const cfg = `${homedir()}/.ssh/config`;
+			if (!existsSync(cfg)) {
+				return [];
+			}
+			const hosts: string[] = [];
+			for (const lineText of readFileSync(cfg, "utf8").split("\n")) {
+				const m = /^\s*[Hh]ost\s+(.+)$/.exec(lineText);
+				if (m) {
+					for (const host of m[1]!.trim().split(/\s+/)) {
+						if (!host.includes("*") && !hosts.includes(host)) {
+							hosts.push(host);
+						}
+					}
+				}
+			}
+			return hosts;
+		});
+	}
+
+	private dockerContainers(): Promise<string[]> {
+		return this.cached("docker:containers", 10_000, async () =>
+			await this.runCommand("docker", ["ps", "--format", "{{.Names}}"]));
+	}
+
 	private async dynamicCompletions(
 		cmd: string,
 		args: string[],
@@ -553,6 +637,15 @@ class BashInlineEditor extends CustomEditor {
 		} else if (cmd === "docker" && args[0] === "compose" && args.length === 1) {
 			items = COMPOSE_SUBCOMMANDS.filter((sc) => sc.startsWith(token));
 			description = "compose subcommand";
+		} else if (cmd === "docker" && args.length === 1 && DOCKER_CONTAINER_VERBS.includes(args[0]!)) {
+			items = (await this.dockerContainers()).filter((c) => c.startsWith(token));
+			description = "container";
+		} else if (cmd === "kubectl" && args[0] === "get" && args.length === 1) {
+			items = KUBECTL_RESOURCES.filter((r) => r.startsWith(token));
+			description = "resource";
+		} else if (["ssh", "scp"].includes(cmd) && args.length === 0) {
+			items = (await this.sshHosts()).filter((h) => h.startsWith(token));
+			description = "host";
 		}
 		if (!items || items.length === 0) {
 			return null;
@@ -683,22 +776,103 @@ class BashInlineEditor extends CustomEditor {
 
 	/** Most recent history entry extending the current line (history strategy). */
 	private historyGhost(): Ghost | null {
+		this.loadCrossSessionHistory();
 		const st = (this as unknown as EditorInternals).state;
 		const line = st.lines[st.cursorLine] ?? "";
 		const typed = line.slice(0, st.cursorCol);
 		if (!typed.trim()) {
 			return null;
 		}
+		const matches: string[] = [];
 		for (let i = this.promptHistory.length - 1; i >= 0; i--) {
 			const entry = this.promptHistory[i] ?? "";
 			// Suggest only the entry's first line: ghost text renders on a
 			// single editor row (full multi-line entries are inserted on accept).
 			const firstLine = entry.split("\n", 1)[0] ?? "";
-			if (firstLine.length > typed.length && firstLine.startsWith(typed)) {
-				return { lineIndex: st.cursorLine, typed, suggestion: firstLine, source: "history" };
+			if (firstLine.length > typed.length && firstLine.startsWith(typed) && !matches.includes(firstLine)) {
+				matches.push(firstLine);
 			}
 		}
-		return null;
+		this.ghostCandidates = matches;
+		this.ghostCandidateIndex = 0;
+		const first = matches[0];
+		return first ? { lineIndex: st.cursorLine, typed, suggestion: first, source: "history" } : null;
+	}
+
+	/**
+	 * Seed the history strategy with prompts from previous sessions in this
+	 * working directory. Opt-in via /autosuggest; runs once per editor.
+	 */
+	private loadCrossSessionHistory(): void {
+		if (this.historyLoaded) {
+			return;
+		}
+		this.historyLoaded = true;
+		if (!config.crossSessionHistory) {
+			return;
+		}
+		try {
+			const sessionsDir = `${homedir()}/.pi/agent/sessions`;
+			const encoded = (p: string) => `--${p.split("/").filter(Boolean).join("-")}--`;
+			let dir: string | undefined;
+			for (const candidate of [process.cwd(), realpathSync(process.cwd())]) {
+				const path13 = `${sessionsDir}/${encoded(candidate)}`;
+				if (existsSync(path13)) {
+					dir = path13;
+					break;
+				}
+			}
+			if (!dir) {
+				return;
+			}
+			const files = readdirSync(dir)
+				.filter((f) => f.endsWith(".jsonl"))
+				.sort()
+				.slice(-5);
+			const prompts: string[] = [];
+			for (const file of files) {
+				for (const lineText of readFileSync(`${dir}/${file}`, "utf8").split("\n")) {
+					try {
+						const entry = JSON.parse(lineText) as {
+							type?: string;
+							message?: { role?: string; content?: string | { type?: string; text?: string }[] };
+						};
+						if (entry.type !== "message" || entry.message?.role !== "user") {
+							continue;
+						}
+						const content = entry.message.content;
+						const text =
+							typeof content === "string"
+								? content
+								: (content ?? [])
+										.filter((b) => b.type === "text")
+										.map((b) => b.text ?? "")
+										.join("");
+						const firstLine = text.split("\n", 1)[0] ?? "";
+						if (firstLine.trim()) {
+							prompts.push(firstLine);
+						}
+					} catch {
+						// partial line or unsupported entry
+					}
+				}
+			}
+			// Cross-session entries come before anything typed this session.
+			this.promptHistory = [...prompts.reverse(), ...this.promptHistory];
+		} catch (e) {
+		}
+	}
+
+	/** Rotate to the previous/next history candidate (Alt+Up / Alt+Down). */
+	private cycleGhostCandidate(dir: 1 | -1): void {
+		const ghost = this.activeGhost();
+		if (!ghost || ghost.source !== "history" || this.ghostCandidates.length < 2) {
+			return;
+		}
+		this.ghostCandidateIndex =
+			(this.ghostCandidateIndex + dir + this.ghostCandidates.length) % this.ghostCandidates.length;
+		this.ghost = { ...ghost, suggestion: this.ghostCandidates[this.ghostCandidateIndex]! };
+		(this as unknown as EditorInternals).tui.requestRender();
 	}
 
 	/** Path ghost from provider suggestions (completion strategy, bash mode). */
@@ -821,8 +995,27 @@ class BashInlineEditor extends CustomEditor {
 
 export default function (pi: ExtensionAPI): void {
 	execApi = pi;
+	loadConfig();
 	pi.on("session_start", (_event, ctx) => {
+		themeRef = ctx.ui.theme;
 		ctx.ui.setEditorComponent((tui, theme, keybindings) => new BashInlineEditor(tui, theme, keybindings));
+	});
+	pi.registerCommand("autosuggest", {
+		description: "Toggle cross-session history for ghost suggestions",
+		handler: async (args, ctx) => {
+			const arg = (args ?? "").trim().toLowerCase();
+			if (arg === "on" || arg === "off") {
+				config.crossSessionHistory = arg === "on";
+			} else {
+				config.crossSessionHistory = !config.crossSessionHistory;
+			}
+			saveConfig();
+			const state = config.crossSessionHistory ? "ON" : "OFF";
+			ctx.ui.notify(
+				`pi-autosuggestions: cross-session history ${state}${config.crossSessionHistory ? " (applies next session)" : ""}`,
+				"info",
+			);
+		},
 	});
 	// Restore the terminal's own cursor color and shape when pi exits so the
 	// shell afterwards isn't left with our forced white bar.
