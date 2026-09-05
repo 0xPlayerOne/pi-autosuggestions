@@ -34,7 +34,7 @@ opencode_security: false
 opencode_security_model:
 sync_mode: overlay
 custom_workflows: preserve
-license: gpl-3.0-or-later
+license: preserve
 git_workflow: direct
 merge_strategy: rebase
 release_merge_strategy: rebase
