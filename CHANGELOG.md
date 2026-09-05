@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.6.2](https://github.com/0xPlayerOne/pi-autosuggestions/compare/pi-autosuggestions-v0.6.1...pi-autosuggestions-v0.6.2) (2026-09-05)
+
+
+### Bug Fixes
+
+* declare engines and limit published files for light installs ([8881ab4](https://github.com/0xPlayerOne/pi-autosuggestions/commit/8881ab4c63ca694cc4d3ee56af1963b538f0050e))
+
 ## [0.6.1](https://github.com/0xPlayerOne/pi-autosuggestions/compare/pi-autosuggestions-v0.6.0...pi-autosuggestions-v0.6.1) (2026-09-05)
 
 
