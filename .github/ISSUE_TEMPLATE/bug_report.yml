@@ -1,0 +1,56 @@
+name: Bug report
+description: Report a reproducible problem or unexpected behavior
+title: '[bug] '
+labels: [bug]
+body:
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Include the commit, branch, runtime/tool versions, operating system, and affected app or package.
+      placeholder: |
+        Commit:
+        Branch:
+        Runtime/tool versions:
+        OS:
+        App/package:
+    validations:
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: Explain what happened, what you expected, and what actually occurred.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps to reproduce
+      description: Provide the smallest reliable reproduction.
+      placeholder: |
+        1.
+        2.
+        3.
+    validations:
+      required: true
+  - type: textarea
+    id: diagnostics
+    attributes:
+      label: Error output and diagnostics
+      description: Include relevant logs, stack traces, CI run links, dependency changes, or screenshots. Remove secrets first.
+  - type: checkboxes
+    id: impact
+    attributes:
+      label: Impact
+      options:
+        - label: Blocks a deployment or pull request.
+        - label: Security or privacy impact is suspected; I will report details privately.
+        - label: Low priority or cosmetic.
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Checks
+      options:
+        - label: I searched existing issues and found no duplicate.
+          required: true

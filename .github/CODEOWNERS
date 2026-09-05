@@ -1,0 +1,4 @@
+# Repository owners and administrators are populated by code-foundry
+# initializer. GitHub CODEOWNERS does not interpolate shell variables.
+# Run the initializer in the target repository to replace this default rule.
+* @OWNER

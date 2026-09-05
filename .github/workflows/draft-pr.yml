@@ -3,13 +3,13 @@ name: Code Foundry
 on:
   push:
     branches:
-      - "feat/*"
-      - "fix/*"
-      - "chore/*"
-      - "refactor/*"
-      - "docs/*"
-      - "style/*"
-      - "test/*"
+      - 'feat/*'
+      - 'fix/*'
+      - 'chore/*'
+      - 'refactor/*'
+      - 'docs/*'
+      - 'style/*'
+      - 'test/*'
 
 permissions:
   contents: read
@@ -19,7 +19,7 @@ jobs:
   draft-pr:
     name: Draft PR
     if: vars.CI_BILLING_PAUSED != 'true'
-    uses: 0xPlayerOne/code-foundry/.github/workflows/draft-pr.yml@v0.40.2
+    uses: 0xPlayerOne/code-foundry/.github/workflows/draft-pr.yml@v0.40.3
     with:
       runner: ubuntu-slim
       base: main

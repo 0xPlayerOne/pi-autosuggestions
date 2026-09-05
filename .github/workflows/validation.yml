@@ -9,7 +9,7 @@ on:
       - reopened
       - ready_for_review
   schedule:
-    - cron: "31 6 * * 1"
+    - cron: '31 6 * * 1'
   workflow_dispatch:
 
 # Default every caller job to no repository permissions. Individual jobs grant
@@ -44,7 +44,7 @@ jobs:
         with:
           persist-credentials: false
           repository: 0xPlayerOne/code-foundry
-          ref: v0.40.2
+          ref: v0.40.3
           path: .github/.code-foundry
           sparse-checkout: |
             src/lib
@@ -72,18 +72,18 @@ jobs:
       contents: read
       packages: read
       security-events: write
-    uses: 0xPlayerOne/code-foundry/.github/workflows/validation.yml@v0.40.2
+    uses: 0xPlayerOne/code-foundry/.github/workflows/validation.yml@v0.40.3
     with:
       mode: ${{ needs.mode.outputs.mode }}
       runtime-repository: 0xPlayerOne/code-foundry
-      runtime-ref: v0.40.2
+      runtime-ref: v0.40.3
       ci-runner: ubuntu-slim
       test-runner: ubuntu-slim
       unit-runner: ubuntu-slim
       security-runner: ubuntu-slim
       codeql-runner: ubuntu-latest
       rust-shards: '["all"]'
-      rust-threads: "1"
+      rust-threads: '1'
       rust-max-parallel: 1
     secrets:
       TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
