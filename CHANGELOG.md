@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.7.1](https://github.com/0xPlayerOne/pi-autosuggestions/compare/pi-autosuggestions-v0.7.0...pi-autosuggestions-v0.7.1) (2026-09-05)
+
+
+### Maintenance
+
+* **ci:** preserve authored MIT license on sync ([34bed9c](https://github.com/0xPlayerOne/pi-autosuggestions/commit/34bed9c7890afcc1fc2b5927c10398027f781c13))
+
 ## [0.7.0](https://github.com/0xPlayerOne/pi-autosuggestions/compare/pi-autosuggestions-v0.6.3...pi-autosuggestions-v0.7.0) (2026-09-05)
 
 
