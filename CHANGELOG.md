@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.7.3](https://github.com/0xPlayerOne/pi-autosuggestions/compare/pi-autosuggestions-v0.7.2...pi-autosuggestions-v0.7.3) (2026-09-05)
+
+
+### Maintenance
+
+* **sync:** adopt code-foundry v1.0.0 baseline ([e83fa5c](https://github.com/0xPlayerOne/pi-autosuggestions/commit/e83fa5c7076d458f654c3f8af3e61dbc407f877e))
+
 ## [0.7.2](https://github.com/0xPlayerOne/pi-autosuggestions/compare/pi-autosuggestions-v0.7.1...pi-autosuggestions-v0.7.2) (2026-09-05)
 
 
