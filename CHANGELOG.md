@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.7.4](https://github.com/0xPlayerOne/pi-autosuggestions/compare/pi-autosuggestions-v0.7.3...pi-autosuggestions-v0.7.4) (2026-09-05)
+
+
+### Maintenance
+
+* **ci:** publish releases to npm ([68e2946](https://github.com/0xPlayerOne/pi-autosuggestions/commit/68e29468f6ed39d896a60c1f1fafaa4608372213))
+
 ## [0.7.3](https://github.com/0xPlayerOne/pi-autosuggestions/compare/pi-autosuggestions-v0.7.2...pi-autosuggestions-v0.7.3) (2026-09-05)
 
 
