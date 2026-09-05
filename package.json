@@ -1,6 +1,6 @@
 {
   "name": "pi-autosuggestions",
-  "version": "0.6.0",
+  "version": "0.6.1",
   "description": "zsh-autosuggestions-style ghost completions for the pi coding agent — history-based inline suggestions, path completion in bash mode, blinking beam cursor",
   "keywords": [
     "pi-package",

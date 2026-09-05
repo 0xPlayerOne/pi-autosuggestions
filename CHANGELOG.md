@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.6.1](https://github.com/0xPlayerOne/pi-autosuggestions/compare/pi-autosuggestions-v0.6.0...pi-autosuggestions-v0.6.1) (2026-09-05)
+
+
+### Documentation
+
+* correct cursor description, remove unused theme helpers ([681f22d](https://github.com/0xPlayerOne/pi-autosuggestions/commit/681f22d629b6d5251e8c4543a288814855e633c5))
+
 ## [0.6.0](https://github.com/0xPlayerOne/pi-autosuggestions/compare/pi-autosuggestions-v0.5.0...pi-autosuggestions-v0.6.0) (2026-09-05)
 
 
