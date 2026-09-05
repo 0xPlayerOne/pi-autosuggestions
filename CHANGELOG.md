@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.7.0](https://github.com/0xPlayerOne/pi-autosuggestions/compare/pi-autosuggestions-v0.6.3...pi-autosuggestions-v0.7.0) (2026-09-05)
+
+
+### ⚠ BREAKING CHANGES
+
+* adopt shared repo layout with src build and full baseline
+
+### Maintenance
+
+* adopt shared repo layout with src build and full baseline ([ced5cbc](https://github.com/0xPlayerOne/pi-autosuggestions/commit/ced5cbc75d34f166359eff54d4bab67debd99656))
+
 ## [0.6.3](https://github.com/0xPlayerOne/pi-autosuggestions/compare/pi-autosuggestions-v0.6.2...pi-autosuggestions-v0.6.3) (2026-09-05)
 
 
