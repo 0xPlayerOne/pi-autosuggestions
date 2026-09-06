@@ -13,14 +13,16 @@ you type:  !cd Desk
 you see:   !cd Desktop/     ( dimmed "top/", first char is your blinking cursor )
 ```
 
+![Ghost completion schematic](https://raw.githubusercontent.com/0xPlayerOne/pi-autosuggestions/main/docs/assets/ghost-schematic.svg)
+
 ## Install
 
 ```bash
-pi install git:github.com/0xPlayerOne/pi-autosuggestions
-# or pinned:
-pi install git:github.com/0xPlayerOne/pi-autosuggestions@pi-autosuggestions-v0.2.1
-# or from npm:
 pi install npm:pi-autosuggestions
+# or pinned:
+pi install npm:pi-autosuggestions@0.7.6
+# or from git:
+pi install git:github.com/0xPlayerOne/pi-autosuggestions
 ```
 
 ## Configuration
@@ -144,6 +146,25 @@ exits. If blinking stays off (e.g. Warp), check the terminal's own cursor-blink
 setting (Warp: Settings → Appearance → Cursor → Blinking).
 A software beam cursor is kept as a fallback if the hardware cursor is
 unavailable.
+
+## Keybindings
+
+| Keys                  | Action                         |
+| --------------------- | ------------------------------ |
+| `→` / `Tab`           | Accept the whole suggestion    |
+| `Alt+f` / `Ctrl+→`    | Accept one word                |
+| `Esc`                 | Dismiss until the next edit    |
+| `Alt+Down` / `Alt+Up` | Cycle multiple history matches |
+
+## Troubleshooting
+
+| Symptom                   | Likely cause                                            | Fix                                                                              |
+| ------------------------- | ------------------------------------------------------- | -------------------------------------------------------------------------------- |
+| No ghost appears          | Nothing in history matches, or cursor left end-of-line  | Type a prefix of a previous prompt; ghosts only show at end-of-line              |
+| Ghost shows in odd places | `updateGhost` runs on every render by design            | `Esc` dismisses; it returns on your next edit                                    |
+| Cursor stays a block      | Terminal ignores DECSCUSR / OSC 12 (e.g. Warp)          | Check the terminal's cursor settings; the software beam fallback covers the rest |
+| Broken after a pi update  | Private pi-tui hooks drifted                            | Failures surface at startup — update the extension; types pin the breakage       |
+| Completions feel stale    | Dynamic caches (branches, scripts, containers) live 10s | Wait a beat or retype; history ghosts are always live                            |
 
 ## Attribution
 

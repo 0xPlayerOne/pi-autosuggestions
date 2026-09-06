@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="150" viewBox="0 0 640 150" font-family="ui-monospace, Menlo, Consolas, monospace">
+  <defs>
+    <style>
+      .box { fill: #1e1e24; stroke: #505050; rx: 8; }
+      .typed { fill: #d4d4d4; font-size: 20px; }
+      .ghost { fill: #808080; font-size: 20px; }
+      .cursor { fill: #8abeb7; }
+      .caption { fill: #808080; font-size: 12px; }
+      .key { fill: #f0c674; font-size: 12px; }
+    </style>
+  </defs>
+  <rect x="16" y="16" width="608" height="76" rx="8" class="box"/>
+  <text x="36" y="48" class="caption">bash mode · you type</text>
+  <text x="36" y="76"><tspan class="typed">!cd Desk</tspan><tspan class="ghost">top/</tspan></text>
+  <rect x="118" y="60" width="9" height="22" class="cursor"/>
+  <text x="36" y="124" class="caption">schematic — ghost text is dimmed inline, cursor rides its first character</text>
+  <text x="470" y="124" class="key">→ accept · Alt+f word · Esc dismiss</text>
+</svg>
