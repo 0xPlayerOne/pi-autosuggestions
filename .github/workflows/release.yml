@@ -22,12 +22,12 @@ jobs:
   release:
     name: Release
     if: vars.CI_BILLING_PAUSED != 'true' || (github.event_name == 'workflow_dispatch' && inputs['release-while-paused'] == true)
-    uses: 0xPlayerOne/code-foundry/.github/workflows/release.yml@v1.0.4
+    uses: 0xPlayerOne/code-foundry/.github/workflows/release.yml@v1.1.1
     with:
       billing-pause-bypass: ${{ github.event_name == 'workflow_dispatch' && inputs['release-while-paused'] == true }}
       runner: ubuntu-slim
       runtime-repository: 0xPlayerOne/code-foundry
-      runtime-ref: v1.0.4
+      runtime-ref: v1.1.1
     secrets:
       CODE_FOUNDRY_TOKEN: ${{ secrets.CODE_FOUNDRY_TOKEN }}
       STAGING_DEPLOY_KEY: ${{ secrets.STAGING_DEPLOY_KEY }}
