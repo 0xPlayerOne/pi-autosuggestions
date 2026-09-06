@@ -36,14 +36,3 @@ updates:
       # Held with TypeScript 5.9 above.
       - dependency-name: '@types/node'
         versions: ['>=23']
-  - package-ecosystem: pip
-    directory: /
-    target-branch: main
-    schedule:
-      interval: weekly
-      day: sunday
-    open-pull-requests-limit: 99
-    groups:
-      python-dependencies:
-        applies-to: version-updates
-        patterns: ['*']
