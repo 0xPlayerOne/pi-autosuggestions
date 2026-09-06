@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.7.7](https://github.com/0xPlayerOne/pi-autosuggestions/compare/pi-autosuggestions-v0.7.6...pi-autosuggestions-v0.7.7) (2026-09-06)
+
+
+### Documentation
+
+* keybindings, troubleshooting, schematic, and current install pin ([0c37efa](https://github.com/0xPlayerOne/pi-autosuggestions/commit/0c37efa0d9bcc3131c2356ead9f40338b33bf022))
+
 ## [0.7.6](https://github.com/0xPlayerOne/pi-autosuggestions/compare/pi-autosuggestions-v0.7.5...pi-autosuggestions-v0.7.6) (2026-09-06)
 
 
