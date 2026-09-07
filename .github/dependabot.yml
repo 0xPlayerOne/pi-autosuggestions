@@ -29,8 +29,10 @@ updates:
         applies-to: version-updates
         patterns: ['*']
     ignore:
-      # TypeScript 7 cannot resolve node: builtins in this toolchain
-      # (verified); revisit when the TS/oxlint toolchain supports TS 7.
+      # TypeScript 7 (the native compiler) is supported by the oxlint/oxfmt
+      # toolchain; the tsconfig must use NodeNext or bundler resolution since
+      # legacy node10 resolution was removed. Held with 5.9 until each
+      # repository's tsconfig is verified on 7.
       - dependency-name: 'typescript'
         versions: ['>=7.0.0']
       # Held with TypeScript 5.9 above.
