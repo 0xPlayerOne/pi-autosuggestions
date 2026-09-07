@@ -1088,7 +1088,6 @@ class BashInlineEditor extends CustomEditor {
           continue
         }
         try {
-          // eslint-disable-next-line no-bitwise
           if (statSync(`${dir}/${name}`).mode & 0o111) {
             names.add(name)
           }
