@@ -3,9 +3,5 @@
   "categories": {
     "correctness": "error"
   },
-  "ignorePatterns": [
-    "node_modules/**",
-    "dist/**",
-    "coverage/**"
-  ]
+  "ignorePatterns": ["node_modules/**", "dist/**", "coverage/**"]
 }
