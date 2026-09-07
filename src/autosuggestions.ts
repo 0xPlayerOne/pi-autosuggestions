@@ -76,6 +76,7 @@ function saveConfig(): void {
 /** Beam cursor: thin vertical bar, bold so it stands out. One cell wide. */
 const BEAM = '\x1b[1m▏\x1b[0m'
 /** Matches the reverse-video block the base renderer emits for the cursor. */
+// oxlint-disable-next-line no-control-regex -- matching ANSI escape output requires control characters
 const REVERSE_CURSOR = /\x1b\[7m([\s\S]*?)\x1b\[0m/
 
 /** First-argument (subcommand) completions for common commands. */
@@ -817,10 +818,6 @@ const KUBECTL_RESOURCES = [
   'ep',
 ]
 
-const BLINK_INTERVAL_MS = 500
-/** Cursor stays solid for this long after each keystroke, then resumes blinking. */
-const SOLID_AFTER_INPUT_MS = 450
-
 type GhostSource = 'history' | 'path'
 type Ghost = { lineIndex: number; typed: string; suggestion: string; source: GhostSource }
 
@@ -874,15 +871,14 @@ class BashInlineEditor extends CustomEditor {
     // Wrap onChange so programmatic text changes (paste, undo, history,
     // setText) also refresh the inline suggestion.
     let external: ((text: string) => void) | undefined
-    const self = this
     Object.defineProperty(this, 'onChange', {
       configurable: true,
       enumerable: true,
-      get() {
+      get: () => {
         if (!external) return undefined
         return (text: string) => {
           external!(text)
-          self.updateGhost()
+          this.updateGhost()
         }
       },
       set(fn) {
@@ -895,13 +891,13 @@ class BashInlineEditor extends CustomEditor {
     Object.defineProperty(this, 'onSubmit', {
       configurable: true,
       enumerable: true,
-      get() {
+      get: () => {
         if (!externalSubmit) return undefined
         return (text: string) => {
           if (text.trim()) {
-            self.promptHistory.push(text)
-            if (self.promptHistory.length > 500) {
-              self.promptHistory.shift()
+            this.promptHistory.push(text)
+            if (this.promptHistory.length > 500) {
+              this.promptHistory.shift()
             }
           }
           externalSubmit!(text)
@@ -1007,7 +1003,7 @@ class BashInlineEditor extends CustomEditor {
       const avail = pad + 1
       let used = 0
       const ghostCells: string[] = []
-      for (const g of [...remainder]) {
+      for (const g of remainder) {
         const w = visibleWidth(g)
         if (used + w > avail) {
           break
@@ -1026,7 +1022,7 @@ class BashInlineEditor extends CustomEditor {
       const avail = pad + 1
       let used = 0
       const ghostCells: string[] = []
-      for (const g of [...remainder]) {
+      for (const g of remainder) {
         const w = visibleWidth(g)
         if (used + w > avail) {
           break
@@ -1273,10 +1269,9 @@ class BashInlineEditor extends CustomEditor {
   }
 
   private createBashProvider(current: AutocompleteProvider): AutocompleteProvider {
-    const self = this
     return {
-      async getSuggestions(lines, cursorLine, cursorCol, options) {
-        if (!self.inBashMode()) {
+      getSuggestions: async (lines, cursorLine, cursorCol, options) => {
+        if (!this.inBashMode()) {
           return current.getSuggestions(lines, cursorLine, cursorCol, options)
         }
         const before = (lines[cursorLine] ?? '').slice(0, cursorCol)
@@ -1288,7 +1283,7 @@ class BashInlineEditor extends CustomEditor {
           const token = arg[2] ?? ''
           const subs = SUBCOMMANDS[cmd]
           const staticMatches = (subs ?? []).filter((sc) => sc.startsWith(token)).slice(0, 50)
-          const dynamic = await self.dynamicCompletions(cmd, [], token)
+          const dynamic = await this.dynamicCompletions(cmd, [], token)
           const dynamicItems = dynamic?.items.filter((d) => !staticMatches.includes(d)) ?? []
           if (staticMatches.length > 0 || dynamicItems.length > 0) {
             return {
@@ -1315,7 +1310,7 @@ class BashInlineEditor extends CustomEditor {
           const cmd = words[0]!
           const token = words[words.length - 1]!
           const args = words.slice(1, -1).filter(Boolean)
-          const dyn = await self.dynamicCompletions(cmd, args, token)
+          const dyn = await this.dynamicCompletions(cmd, args, token)
           if (dyn && dyn.items.length > 0) {
             return {
               items: dyn.items.map((sc) => ({
@@ -1330,9 +1325,9 @@ class BashInlineEditor extends CustomEditor {
         let queryLines = lines
         let commandItems: AutocompleteItem[] = []
         let word = ''
-        if (self.commandPosition(before)) {
+        if (this.commandPosition(before)) {
           word = before.replace(/^[ \t]*!+/, '')
-          const commands = self.matchingCommands(word)
+          const commands = this.matchingCommands(word)
           queryLines = [...lines]
           if (commands.length > 0) {
             // The typed word is a prefix of real commands: offer them
@@ -1362,9 +1357,9 @@ class BashInlineEditor extends CustomEditor {
         }
       },
 
-      applyCompletion(lines, cursorLine, cursorCol, item, prefix) {
+      applyCompletion: (lines, cursorLine, cursorCol, item, prefix) => {
         const before = (lines[cursorLine] ?? '').slice(0, cursorCol)
-        if (self.inBashMode() && self.commandPosition(before)) {
+        if (this.inBashMode() && this.commandPosition(before)) {
           const value = item.value ?? ''
           const line = lines[cursorLine] ?? ''
           const newLines = [...lines]
@@ -1382,9 +1377,8 @@ class BashInlineEditor extends CustomEditor {
         return current.applyCompletion(lines, cursorLine, cursorCol, item, prefix)
       },
 
-      shouldTriggerFileCompletion(lines, cursorLine, cursorCol) {
-        return current.shouldTriggerFileCompletion?.(lines, cursorLine, cursorCol) ?? true
-      },
+      shouldTriggerFileCompletion: (lines, cursorLine, cursorCol) =>
+        current.shouldTriggerFileCompletion?.(lines, cursorLine, cursorCol) ?? true,
     }
   }
   /** The ghost suggestion, only if it still matches the current editor state. */
@@ -1494,7 +1488,7 @@ class BashInlineEditor extends CustomEditor {
       }
       // Cross-session entries come before anything typed this session.
       this.promptHistory = [...prompts.reverse(), ...this.promptHistory]
-    } catch (e) {}
+    } catch {}
   }
 
   /** Rotate to the previous/next history candidate (Alt+Up / Alt+Down). */
