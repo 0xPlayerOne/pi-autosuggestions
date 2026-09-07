@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.8.2](https://github.com/0xPlayerOne/pi-autosuggestions/compare/pi-autosuggestions-v0.8.1...pi-autosuggestions-v0.8.2) (2026-09-07)
+
+
+### Bug Fixes
+
+* **ci:** pin generated callers to the adopted v1.4.1 runtime ([#38](https://github.com/0xPlayerOne/pi-autosuggestions/issues/38)) ([8c35f25](https://github.com/0xPlayerOne/pi-autosuggestions/commit/8c35f25ff91d420b8e78ff24e6026c0e4ca4bd2d))
+
+
+### Maintenance
+
+* **code-foundry:** upgrade to v1.4.1 ([#35](https://github.com/0xPlayerOne/pi-autosuggestions/issues/35)) ([b5c80fa](https://github.com/0xPlayerOne/pi-autosuggestions/commit/b5c80fa478bc20d3e52719ecbfeecb8c21113844))
+
 ## [0.8.1](https://github.com/0xPlayerOne/pi-autosuggestions/compare/pi-autosuggestions-v0.8.0...pi-autosuggestions-v0.8.1) (2026-09-07)
 
 
