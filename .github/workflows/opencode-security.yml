@@ -1,0 +1,69 @@
+name: Code Foundry
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  detect:
+    name: OpenCode Security / Detect
+    if: >-
+      vars.CI_BILLING_PAUSED != 'true' &&
+      (github.event_name == 'workflow_dispatch' ||
+      startsWith(github.event.pull_request.head.ref, 'release-please--branches--main'))
+    runs-on: ubuntu-slim
+    outputs:
+      enabled: ${{ steps.detect.outputs.enabled }}
+      token: ${{ steps.detect.outputs.token }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - name: Detect configuration and token
+        id: detect
+        env:
+          OPENCODE_API_KEY: ${{ secrets.OPENCODE_API_KEY }}
+          OPENCODE_SECURITY_OVERRIDE: ${{ vars.OPENCODE_SECURITY }}
+        run: |
+          enabled=false
+          token=false
+          # The OPENCODE_SECURITY repository variable overrides the
+          # configuration: true opts a repository in, false opts it out, and
+          # an unset value falls back to the code-foundry configuration.
+          if [ "$OPENCODE_SECURITY_OVERRIDE" = "true" ]; then
+            enabled=true
+          elif [ "$OPENCODE_SECURITY_OVERRIDE" = "false" ]; then
+            enabled=false
+          elif grep -Eq '^opencode_security:\s*(true|auto)\s*$' .github/code-foundry.yml 2>/dev/null; then enabled=true; fi
+          if [ -n "$OPENCODE_API_KEY" ]; then token=true; fi
+          echo "enabled=$enabled" >> "$GITHUB_OUTPUT"
+          echo "token=$token" >> "$GITHUB_OUTPUT"
+
+  # Reusable workflows can only be called from a job level, so the scan is
+  # its own job gated on the detect outputs. The scan itself still runs only
+  # for generated release pull requests (or manual dispatch) with the
+  # scanner configured and keyed.
+  scan:
+    name: OpenCode Security / Scan
+    needs: detect
+    if: >-
+      vars.CI_BILLING_PAUSED != 'true' &&
+      needs.detect.outputs.enabled == 'true' &&
+      needs.detect.outputs.token == 'true'
+    uses: 0xPlayerOne/opencode-security/.github/workflows/opencode-security.yml@137698ef3545204af8fad00fc8bd64d663c8122e # main
+    with:
+      # This is the scanner checkout ref, not the consumer PR ref. The
+      # reusable workflow already checks out the consumer repository.
+      source_ref: 137698ef3545204af8fad00fc8bd64d663c8122e
+      runner: ubuntu-latest
+      model: opencode-go/muse-spark-1.3-contributor
+      mode: standard
+      fail_on_severity: high
+      max_cost_usd: 1
+    secrets:
+      OPENCODE_API_KEY: ${{ secrets.OPENCODE_API_KEY }}
