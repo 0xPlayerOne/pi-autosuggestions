@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.8.1](https://github.com/0xPlayerOne/pi-autosuggestions/compare/pi-autosuggestions-v0.8.0...pi-autosuggestions-v0.8.1) (2026-09-07)
+
+
+### Maintenance
+
+* adopt code-foundry v1.3.1 baseline and migrate to oxlint/oxfmt ([#33](https://github.com/0xPlayerOne/pi-autosuggestions/issues/33)) ([361a65a](https://github.com/0xPlayerOne/pi-autosuggestions/commit/361a65a4682677b9e19e867d0b393ea991257292))
+
 ## [0.8.0](https://github.com/0xPlayerOne/pi-autosuggestions/compare/pi-autosuggestions-v0.7.10...pi-autosuggestions-v0.8.0) (2026-09-07)
 
 
