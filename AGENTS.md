@@ -112,7 +112,7 @@ Run focused tests first, then the complete applicable set for release, security,
 
 At minimum:
 
-- TypeScript/JavaScript: Prettier formatting, ESLint linting, type-check, build, and Bun's native test runner for unit/integration tests; use the project's native browser runner for E2E tests
+- TypeScript/JavaScript: Oxfmt formatting, Oxlint linting, type-check, build, and Bun's native test runner for unit/integration tests; use the project's native browser runner for E2E tests. Repositories still on Prettier/ESLint keep working through the runtime's fallback detection until they migrate.
 - Do not add Vitest. Preserve specialized native runners such as Matchstick for The Graph and Hardhat for smart contracts.
 - Rust: default rustfmt, Clippy with warnings treated as errors, check, unit/integration tests, and dependency audit
 - Python: Ruff formatting and linting, compile or type checks, pytest, coverage, and dependency audit

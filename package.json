@@ -3,19 +3,28 @@
   "version": "0.7.10",
   "description": "zsh-autosuggestions-style ghost completions for the pi coding agent — history-based inline suggestions, path completion in bash mode, blinking beam cursor",
   "keywords": [
-    "pi-package",
-    "pi",
     "autocomplete",
-    "completions",
     "autosuggestions",
+    "completions",
+    "pi",
+    "pi-package",
     "zsh"
   ],
+  "homepage": "https://github.com/0xPlayerOne/pi-autosuggestions#readme",
+  "bugs": {
+    "url": "https://github.com/0xPlayerOne/pi-autosuggestions/issues"
+  },
   "license": "MIT",
   "author": "Andrew Mahoney-Fernandes <0xPlayerOne>",
-  "type": "module",
-  "engines": {
-    "node": "^20.19.0 || ^22.12.0 || >=23"
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/0xPlayerOne/pi-autosuggestions.git"
   },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "type": "module",
   "sideEffects": false,
   "main": "./dist/autosuggestions.js",
   "types": "./dist/autosuggestions.d.ts",
@@ -28,40 +37,34 @@
       "default": "./package.json"
     }
   },
-  "files": [
-    "dist",
-    "README.md"
-  ],
-  "pi": {
-    "extensions": [
-      "./dist/autosuggestions.js"
-    ]
-  },
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "format:check": "prettier --check .",
+    "format:check": "oxfmt --check .",
+    "fmt": "oxfmt .",
+    "lint": "oxlint",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "prepublishOnly": "npm run build",
     "test": "node --test test/package.test.mjs",
     "pretest": "npm run build"
   },
-  "peerDependencies": {
-    "@earendil-works/pi-coding-agent": "*",
-    "@earendil-works/pi-tui": "*"
-  },
   "devDependencies": {
     "@earendil-works/pi-coding-agent": "*",
     "@earendil-works/pi-tui": "*",
     "@types/node": "^22.0.0",
-    "prettier": "^3.9.6",
+    "oxfmt": "^0.66.0",
+    "oxlint": "^1.81.0",
     "typescript": "^5.9.0"
   },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/0xPlayerOne/pi-autosuggestions.git"
+  "peerDependencies": {
+    "@earendil-works/pi-coding-agent": "*",
+    "@earendil-works/pi-tui": "*"
   },
-  "homepage": "https://github.com/0xPlayerOne/pi-autosuggestions#readme",
-  "bugs": {
-    "url": "https://github.com/0xPlayerOne/pi-autosuggestions/issues"
+  "engines": {
+    "node": "^20.19.0 || ^22.12.0 || >=23"
+  },
+  "pi": {
+    "extensions": [
+      "./dist/autosuggestions.js"
+    ]
   }
 }

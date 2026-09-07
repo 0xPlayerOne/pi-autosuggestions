@@ -9,7 +9,7 @@ codeql_rust_shards: '["all"]'
 codeql_rust_threads: 1
 codeql_rust_max_parallel: 1
 runtime_repository: 0xPlayerOne/code-foundry
-runtime_ref: v1.2.0
+runtime_ref: v1.2.1
 runner: ubuntu-slim
 ci_runner: ubuntu-slim
 test_runner: ubuntu-slim
