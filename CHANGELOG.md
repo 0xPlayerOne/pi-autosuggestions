@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.8.0](https://github.com/0xPlayerOne/pi-autosuggestions/compare/pi-autosuggestions-v0.7.10...pi-autosuggestions-v0.8.0) (2026-09-07)
+
+
+### Features
+
+* migrate formatting and linting from Prettier/ESLint to oxfmt/oxlint ([#31](https://github.com/0xPlayerOne/pi-autosuggestions/issues/31)) ([a0aff36](https://github.com/0xPlayerOne/pi-autosuggestions/commit/a0aff36e10e72dc8592d2c481d94678f900b6dff))
+
 ## [0.7.10](https://github.com/0xPlayerOne/pi-autosuggestions/compare/pi-autosuggestions-v0.7.9...pi-autosuggestions-v0.7.10) (2026-09-06)
 
 
