@@ -4,9 +4,5 @@
     "correctness": "error",
     "suspicious": "warn"
   },
-  "ignorePatterns": [
-    "node_modules/**",
-    "dist/**",
-    "coverage/**"
-  ]
+  "ignorePatterns": ["node_modules/**", "dist/**", "coverage/**"]
 }
