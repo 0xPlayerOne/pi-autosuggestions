@@ -13,10 +13,7 @@ permissions:
 jobs:
   detect:
     name: OpenCode Security / Detect
-    if: >-
-      vars.CI_BILLING_PAUSED != 'true' &&
-      (github.event_name == 'workflow_dispatch' ||
-      startsWith(github.event.pull_request.head.ref, 'release-please--branches--main'))
+    if: vars.CI_BILLING_PAUSED != 'true'
     runs-on: ubuntu-slim
     outputs:
       enabled: ${{ steps.detect.outputs.enabled }}
@@ -44,9 +41,9 @@ jobs:
           echo "token=$token" >> "$GITHUB_OUTPUT"
 
   # Reusable workflows can only be called from a job level, so the scan is
-  # its own job gated on the detect outputs. The scan itself still runs only
-  # for generated release pull requests (or manual dispatch) with the
-  # scanner configured and keyed.
+  # its own job gated on the detect outputs. The scanner runs for any ready
+  # pull request (or manual dispatch) when the repository variable opts in
+  # and the API key is configured.
   scan:
     name: OpenCode Security / Scan
     needs: detect
