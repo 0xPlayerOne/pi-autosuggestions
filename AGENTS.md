@@ -1,5 +1,7 @@
 # Agent Instructions
 
+<!-- code-foundry-managed: config-aware-policy -->
+
 These instructions are the repository-level operating contract for coding agents, including Hermes, OpenCode, and other automation.
 
 They complement `CONTRIBUTING.md`. More specific instructions in nested `AGENTS.md` files and project documentation take precedence for their directory.
@@ -73,9 +75,24 @@ For normal feature work, branch from `main` and target pull requests at `main`. 
 
 ## Git workflow and merging
 
-This repository uses the `direct` workflow: topic branches **squash** directly into `main`, and the Release Please version PR **rebases** into `main` (`release_merge_strategy: rebase`). Feature PRs land on `main` with squash merges; release PRs land on `main` with rebase merges. No integration branch exists; all pull requests target `main`.
+This repository uses the `direct` workflow: topic branches **squash** directly into `main`, and the Release Please version PR **squashes** into `main` (`release_merge_strategy: squash`). Feature and release PRs land on `main` with squash merges. No integration branch exists; all pull requests target `main`.
 
 Merge only with the repository's canonical method. Never merge with `--admin`, never default or auto-select a merge method, and never use a method the branch ruleset does not allow. When in doubt, prefer the merge button's configured method and verify the ruleset after merging. Check `.github/CONTRIBUTING.md` for the complete flow and merge table.
+
+### Branch and commit policy
+
+Branch rulesets enforce deletions, force-pushes, required status checks, pull
+requests, conversation resolution, and linear history where the repository's
+plan supports them. Mirror those rules even where the plan cannot enforce
+them:
+
+- Branch from the default branch using
+  `feat/*`, `fix/*`, `chore/*`, `refactor/*`, `docs/*`, or `test/*` names.
+- Never push directly to protected branches; open a pull request.
+- Use Conventional Commit subjects (`feat:`, `fix:`, `chore:`, …); Release
+  Please depends on them to version releases.
+- Keep pull requests focused; merge with the canonical method only after
+  required checks pass.
 
 ## Toolchain and dependencies
 
@@ -105,6 +122,7 @@ node src/runtime.mjs ci unit
 node src/runtime.mjs ci integration
 node src/runtime.mjs ci e2e
 node src/runtime.mjs ci smoke
+node src/runtime.mjs ci performance
 Security and dependency audits run through the GitHub Security workflow.
 ```
 
@@ -112,7 +130,7 @@ Run focused tests first, then the complete applicable set for release, security,
 
 At minimum:
 
-- TypeScript/JavaScript: Oxfmt formatting, Oxlint linting, type-check, build, and Bun's native test runner for unit/integration tests; use the project's native browser runner for E2E tests. Repositories still on Prettier/ESLint keep working through the runtime's fallback detection until they migrate.
+- TypeScript/JavaScript: Oxfmt formatting, Oxlint linting, type-check, build, and Bun's native test runner for unit/integration tests; use the project's native browser runner for E2E tests. Repositories using a different linter or formatter keep full control through their own `lint`/`format` scripts, which the runtime honors.
 - Do not add Vitest. Preserve specialized native runners such as Matchstick for The Graph and Hardhat for smart contracts.
 - Rust: default rustfmt, Clippy with warnings treated as errors, check, unit/integration tests, and dependency audit
 - Python: Ruff formatting and linting, compile or type checks, pytest, coverage, and dependency audit
@@ -123,7 +141,7 @@ If a check cannot run, state the exact reason. A skipped check is not a passing 
 ## Tests and coverage
 
 - Add or update tests for behavior changes and regressions.
-- Keep unit, integration, E2E, and smoke coverage in the suite where each applies.
+- Keep unit, performance, integration, E2E, and smoke coverage in the suite where each applies.
 - Preserve project-specific coverage thresholds; do not lower them to make CI green.
 - Keep test data deterministic and remove secrets from logs and fixtures.
 - Use the narrowest test command while iterating, then run the affected package or workspace suite.

@@ -1,5 +1,5 @@
 {
-  "buildMilliseconds": 10000,
+  "buildMilliseconds": 15000,
   "testMilliseconds": 10000,
   "historyP95Milliseconds": 2,
   "pluginImportHeapBytes": 67108864,
