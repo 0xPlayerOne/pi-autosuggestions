@@ -1,0 +1,44 @@
+name: Code Foundry Draft Control
+
+on:
+  pull_request:
+    branches: [main]
+    types:
+      - converted_to_draft
+
+permissions:
+  actions: write
+  contents: read
+
+jobs:
+  cancel:
+    name: Draft Control / Halt CI
+    if: vars.CI_BILLING_PAUSED != 'true'
+    runs-on: ubuntu-slim
+    timeout-minutes: 5
+    steps:
+      - name: Cancel queued and running checks for this branch
+        env:
+          GH_TOKEN: ${{ github.token }}
+          HEAD_BRANCH: ${{ github.event.pull_request.head.ref }}
+          CURRENT_RUN_ID: ${{ github.run_id }}
+        run: |
+          set -euo pipefail
+          for status in queued in_progress; do
+            gh api "repos/$GITHUB_REPOSITORY/actions/runs" \
+              --method GET \
+              -f branch="$HEAD_BRANCH" \
+              -f event=pull_request \
+              -f status="$status" \
+              --paginate \
+              --jq '.workflow_runs[].id' |
+              while read -r run_id; do
+                if [ -n "$run_id" ] && [ "$run_id" -lt "$CURRENT_RUN_ID" ]; then
+                  gh api \
+                    --method POST \
+                    "repos/$GITHUB_REPOSITORY/actions/runs/$run_id/cancel" \
+                    --silent || true
+                fi
+              done
+          done
+          echo "CI is halted while pull request #${{ github.event.pull_request.number }} remains draft."

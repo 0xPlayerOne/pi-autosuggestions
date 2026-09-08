@@ -4,11 +4,7 @@ on:
   pull_request:
     branches: [main]
     types:
-      - opened
-      - synchronize
-      - reopened
       - ready_for_review
-      - converted_to_draft
   workflow_dispatch:
 
 permissions:
@@ -20,8 +16,7 @@ jobs:
     if: >-
       vars.CI_BILLING_PAUSED != 'true' &&
       (github.event_name == 'workflow_dispatch' ||
-      (github.event.pull_request.draft == false &&
-      startsWith(github.event.pull_request.head.ref, 'release-please--branches--main')))
+      startsWith(github.event.pull_request.head.ref, 'release-please--branches--main'))
     runs-on: ubuntu-slim
     outputs:
       enabled: ${{ steps.detect.outputs.enabled }}
@@ -39,14 +34,11 @@ jobs:
         run: |
           enabled=false
           token=false
-          # The OPENCODE_SECURITY repository variable overrides the
-          # configuration: true opts a repository in, false opts it out, and
-          # an unset value falls back to the code-foundry configuration.
+          # OpenCode Security is controlled only by the repository or
+          # organization variable. An unset value is disabled.
           if [ "$OPENCODE_SECURITY_OVERRIDE" = "true" ]; then
             enabled=true
-          elif [ "$OPENCODE_SECURITY_OVERRIDE" = "false" ]; then
-            enabled=false
-          elif grep -Eq '^opencode_security:\s*(true|auto)\s*$' .github/code-foundry.yml 2>/dev/null; then enabled=true; fi
+          fi
           if [ -n "$OPENCODE_API_KEY" ]; then token=true; fi
           echo "enabled=$enabled" >> "$GITHUB_OUTPUT"
           echo "token=$token" >> "$GITHUB_OUTPUT"

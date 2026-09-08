@@ -4,11 +4,7 @@ on:
   pull_request:
     branches: [main]
     types:
-      - opened
-      - synchronize
-      - reopened
       - ready_for_review
-      - converted_to_draft
 
 # Default every caller job to no repository permissions. Individual jobs grant
 # only the scopes their own validation path consumes.
@@ -22,10 +18,9 @@ concurrency:
 jobs:
   mode:
     name: Mode
-    # Draft updates still create a lightweight skipped workflow record so a
-    # converted-to-draft event can cancel in-flight validation, but no runner
-    # or reusable validation workflow starts until the PR is ready for review.
-    if: vars.CI_BILLING_PAUSED != 'true' && github.event.pull_request.draft == false
+    # The workflow is emitted only for ready_for_review, so draft pull requests
+    # register no skipped validation checks and allocate no validation runner.
+    if: vars.CI_BILLING_PAUSED != 'true'
     runs-on: ubuntu-slim
     timeout-minutes: 10
     permissions:
@@ -44,7 +39,7 @@ jobs:
         with:
           persist-credentials: false
           repository: 0xPlayerOne/code-foundry
-          ref: v1.9.5
+          ref: v1.9.6
           path: .github/.code-foundry
           sparse-checkout: |
             src/lib
@@ -64,7 +59,7 @@ jobs:
   validation:
     name: Validation
     needs: mode
-    if: vars.CI_BILLING_PAUSED != 'true' && github.event.pull_request.draft == false
+    if: vars.CI_BILLING_PAUSED != 'true'
     # Reusable workflows can only maintain or reduce the caller job's scopes.
     # The audit tier needs security-events: write for CodeQL uploads.
     permissions:
@@ -72,14 +67,14 @@ jobs:
       contents: read
       packages: read
       security-events: write
-    uses: 0xPlayerOne/code-foundry/.github/workflows/validation.yml@v1.9.5
+    uses: 0xPlayerOne/code-foundry/.github/workflows/validation.yml@v1.9.6
     with:
       mode: ${{ needs.mode.outputs.mode }}
       runtime-repository: 0xPlayerOne/code-foundry
       # Pull requests validate the proposed runtime commit. Scheduled and
       # manually dispatched audits use a separate default-branch-pinned caller,
       # so this caller-selected ref never runs with default-branch cache access.
-      runtime-ref: v1.9.5
+      runtime-ref: v1.9.6
       ci-runner: ubuntu-slim
       test-runner: ubuntu-slim
       unit-runner: ubuntu-slim

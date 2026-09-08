@@ -48,7 +48,7 @@ docs/*  test/*  refactor/*         │
 | `main`                                                         | Protected release branch | Merge through pull requests only. No direct pushes.    |
 | `feat/*`, `fix/*`, `chore/*`, `refactor/*`, `docs/*`, `test/*` | Focused work             | Branch from `main`; keep changes small and reviewable. |
 
-The Git workflow is `direct`: topic branches **squash** directly into `main`, and the Release Please version PR **squashes** into `main` (`release_merge_strategy: squash`). Release automation never defaults to a merge method and never merges with `--admin`; `code-foundry doctor` and `code-foundry sync` fail closed on any other release merge strategy. Feature branches never touch `staging`; repositories with a preview/staging environment opt into `git_workflow: staging-release` explicitly.
+The Git workflow is `direct`: topic branches **squash** directly into `main`, and the Release Please version PR **squashes** into `main` (`release_merge_strategy: squash`). Release automation never defaults to a merge method and never merges with `--admin`; `code-foundry doctor` and `code-foundry sync` fail closed on any other release merge strategy. This repository has one protected integration and release branch: `main`.
 
 ## Before you start
 
@@ -161,7 +161,7 @@ Keep pull requests focused and reviewable. Include screenshots or recordings for
 | Scheduled or manual validation | Full audit tier |
 | Push to a working branch | Draft PR workflow |
 | Push to `main` | Release workflow; canonical validation already ran on the merged PR |
-Draft pull requests do not start runner-heavy validation. Marking a pull request ready for review starts the applicable validation tier; converting it back to draft cancels in-flight validation, and no replacement starts until it is ready again.
+Draft pull requests do not start validation. Marking a pull request ready for review starts the applicable validation tier. Convert it back to draft after an update, then mark it ready again after every update so the required checks attach to the current head. Converting it to draft runs only the lightweight cancellation control.
 
 Pull-request validation keys concurrency by event and pull-request head, so a newer update cancels its superseded run. Scheduled and manual audits use a separate caller pinned to the protected default branch; this prevents caller-selected runtime code from executing with default-branch cache access. Both callers use the mode-aware orchestrator, which fans out only the required jobs and concludes with the stable aggregate gate.
 
