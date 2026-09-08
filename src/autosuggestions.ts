@@ -35,6 +35,7 @@ import {
 import { dirname } from 'node:path'
 import { homedir } from 'node:os'
 import type { AutocompleteItem } from '@earendil-works/pi-tui'
+import { findHistoryCandidates } from './history.js'
 
 interface EditorInternals {
   state: { lines: string[]; cursorLine: number; cursorCol: number }
@@ -1407,20 +1408,9 @@ class BashInlineEditor extends CustomEditor {
     if (!typed.trim()) {
       return null
     }
-    const matches: string[] = []
-    for (let i = this.promptHistory.length - 1; i >= 0; i--) {
-      const entry = this.promptHistory[i] ?? ''
-      // Suggest only the entry's first line: ghost text renders on a
-      // single editor row (full multi-line entries are inserted on accept).
-      const firstLine = entry.split('\n', 1)[0] ?? ''
-      if (
-        firstLine.length > typed.length &&
-        firstLine.startsWith(typed) &&
-        !matches.includes(firstLine)
-      ) {
-        matches.push(firstLine)
-      }
-    }
+    // Suggest only each entry's first line: ghost text renders on a single
+    // editor row (full multi-line entries are inserted on accept).
+    const matches = findHistoryCandidates(this.promptHistory, typed)
     this.ghostCandidates = matches
     this.ghostCandidateIndex = 0
     const first = matches[0]
