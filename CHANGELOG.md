@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.8.4](https://github.com/0xPlayerOne/pi-autosuggestions/compare/pi-autosuggestions-v0.8.3...pi-autosuggestions-v0.8.4) (2026-09-08)
+
+
+### Performance
+
+* add plugin performance regression budgets ([#42](https://github.com/0xPlayerOne/pi-autosuggestions/issues/42)) ([c16eaac](https://github.com/0xPlayerOne/pi-autosuggestions/commit/c16eaac3771ee30bba570498c1089c1330882508)), closes [#39](https://github.com/0xPlayerOne/pi-autosuggestions/issues/39)
+
 ## [0.8.3](https://github.com/0xPlayerOne/pi-autosuggestions/compare/pi-autosuggestions-v0.8.2...pi-autosuggestions-v0.8.3) (2026-09-08)
 
 
