@@ -13,9 +13,9 @@ npm run performance:check
 ```
 
 Use `npm run performance` to print the same measurements without failing when
-a budget is exceeded. Both commands rebuild the plugin and run its unit tests
-before measuring the built artifact. The normal `npm test` command also runs
-the budget gate, so Code Foundry's CI test job enforces M0 on pull requests.
+a budget is exceeded. Both performance commands rebuild the plugin and run its
+unit tests before measuring the built artifact. Code Foundry runs
+`performance:check` in its dedicated performance job on pull requests.
 
 The harness prints JSON containing the observed metrics, configured budgets,
 and pass/fail status. Budgets live in `performance-budgets.json` and cover:
@@ -55,12 +55,13 @@ the measured regression and its rationale.
 
 ## CI command
 
-The repository's reusable Code Foundry workflow runs:
+The repository's reusable Code Foundry workflow runs behavior tests and
+performance budgets as separate jobs:
 
 ```bash
 npm test
+npm run performance:check
 ```
 
-That command builds the extension, runs behavior tests, and executes
-`npm run performance:check`. A budget breach exits non-zero and fails the test
-job.
+The first command builds the extension and runs behavior tests. A budget breach
+in the second command exits non-zero and fails `Validation / Test / Performance`.

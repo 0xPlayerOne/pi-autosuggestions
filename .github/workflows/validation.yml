@@ -8,16 +8,12 @@ on:
       - synchronize
       - reopened
       - ready_for_review
-  schedule:
-    - cron: '31 6 * * 1'
-  workflow_dispatch:
 
 # Default every caller job to no repository permissions. Individual jobs grant
 # only the scopes their own validation path consumes.
 permissions: {}
 
-# Superseded PR updates cancel the previous run; schedule and dispatch runs
-# are keyed by event so periodic audits and manual runs stay independent.
+# Superseded PR updates cancel the previous run.
 concurrency:
   group: code-foundry-validation-${{ github.event_name }}-${{ github.event.pull_request.head.repo.full_name || github.repository }}-${{ github.event.pull_request.head.ref || github.ref_name }}
   cancel-in-progress: true
@@ -44,7 +40,7 @@ jobs:
         with:
           persist-credentials: false
           repository: 0xPlayerOne/code-foundry
-          ref: v1.5.1
+          ref: v1.9.0
           path: .github/.code-foundry
           sparse-checkout: |
             src/lib
@@ -72,14 +68,18 @@ jobs:
       contents: read
       packages: read
       security-events: write
-    uses: 0xPlayerOne/code-foundry/.github/workflows/validation.yml@v1.5.1
+    uses: 0xPlayerOne/code-foundry/.github/workflows/validation.yml@v1.9.0
     with:
       mode: ${{ needs.mode.outputs.mode }}
       runtime-repository: 0xPlayerOne/code-foundry
-      runtime-ref: v1.5.1
+      # Pull requests validate the proposed runtime commit. Scheduled and
+      # manually dispatched audits are isolated in validation_audit_self-ci.yml
+      # so this caller-selected ref never runs with default-branch cache access.
+      runtime-ref: v1.9.0
       ci-runner: ubuntu-slim
       test-runner: ubuntu-slim
       unit-runner: ubuntu-slim
+      performance-runner: ubuntu-slim
       security-runner: ubuntu-slim
       codeql-runner: ubuntu-latest
       rust-shards: '["all"]'

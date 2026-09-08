@@ -48,7 +48,7 @@
     "prepublishOnly": "npm run build",
     "test": "npm run test:unit",
     "pretest:unit": "npm run build",
-    "test:unit": "npm run test:behavior && npm run performance:check",
+    "test:unit": "npm run test:behavior",
     "test:behavior": "node --test test/*.test.mjs"
   },
   "devDependencies": {

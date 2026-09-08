@@ -39,11 +39,13 @@ htmlcov/
 .coverage*
 .next/
 artifacts/
+performance-results.json
 cache/
 !.github/actions/cache/
 !.github/actions/cache/action.yml
 typechain/
 coverage.json
+performance-results/
 tests/.bin/
 **/.app/
 
