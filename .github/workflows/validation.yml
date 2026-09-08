@@ -78,7 +78,7 @@ jobs:
       ci-runner: ubuntu-slim
       test-runner: ubuntu-slim
       unit-runner: ubuntu-slim
-      performance-runner: ubuntu-slim
+      performance-runner: ubuntu-latest
       security-runner: ubuntu-slim
       codeql-runner: ubuntu-latest
       rust-shards: '["all"]'
