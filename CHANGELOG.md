@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.8.5](https://github.com/0xPlayerOne/pi-autosuggestions/compare/pi-autosuggestions-v0.8.4...pi-autosuggestions-v0.8.5) (2026-09-08)
+
+
+### Maintenance
+
+* **ci:** upgrade Code Foundry to v1.9.11 ([#44](https://github.com/0xPlayerOne/pi-autosuggestions/issues/44)) ([fe68d36](https://github.com/0xPlayerOne/pi-autosuggestions/commit/fe68d3605dfe7922848c38250a6c5e127a90813a))
+
 ## [0.8.4](https://github.com/0xPlayerOne/pi-autosuggestions/compare/pi-autosuggestions-v0.8.3...pi-autosuggestions-v0.8.4) (2026-09-08)
 
 
