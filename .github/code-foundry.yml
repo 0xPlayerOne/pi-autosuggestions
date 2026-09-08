@@ -38,8 +38,8 @@ sync_mode: overlay
 custom_workflows: preserve
 license: preserve
 git_workflow: direct
-merge_strategy: rebase
-release_merge_strategy: rebase
+merge_strategy: squash
+release_merge_strategy: squash
 performance_command:
 performance_profile:
 performance_budget_file: performance-package-budgets.json
