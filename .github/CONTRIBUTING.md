@@ -155,11 +155,14 @@ Keep pull requests focused and reviewable. Include screenshots or recordings for
 
 | Event | Expected automation |
 |------------------------------------------------------------------------------------------------------------------------------------------------|
-| Pull request targeting `main` | Audit validation: CI, full tests, Security, and CodeQL, ending in `Validation / Gate` |
+| Draft pull request targeting `main` | No runner-heavy validation; run local checks before requesting review |
+| Ready pull request targeting `main` | Audit validation: CI, full tests, Security, and CodeQL, ending in `Validation / Gate` |
 | Exact Release Please pull request targeting `main` | Release-policy validation only, ending in `Validation / Gate` |
 | Scheduled or manual validation | Full audit tier |
 | Push to a working branch | Draft PR workflow |
 | Push to `main` | Release workflow; canonical validation already ran on the merged PR |
+Draft pull requests do not start runner-heavy validation. Marking a pull request ready for review starts the applicable validation tier; converting it back to draft cancels in-flight validation, and no replacement starts until it is ready again.
+
 Pull-request validation keys concurrency by event and pull-request head, so a newer update cancels its superseded run. Scheduled and manual audits use a separate caller pinned to the protected default branch; this prevents caller-selected runtime code from executing with default-branch cache access. Both callers use the mode-aware orchestrator, which fans out only the required jobs and concludes with the stable aggregate gate.
 
 Required checks are enforced by branch protection rulesets/branch protection. Do not duplicate their checklists in the pull request description; document validation commands and results instead.
