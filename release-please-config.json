@@ -43,6 +43,8 @@
       "section": "Maintenance"
     }
   ],
+  "pull-request-title-pattern": "chore(main): release ${version}",
+  "group-pull-request-title-pattern": "chore(main): release ${version}",
   "packages": {
     ".": {}
   }

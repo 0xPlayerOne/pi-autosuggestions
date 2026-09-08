@@ -30,13 +30,13 @@ jobs:
         id: detect
         env:
           OPENCODE_API_KEY: ${{ secrets.OPENCODE_API_KEY }}
-          OPENCODE_SECURITY_OVERRIDE: ${{ vars.OPENCODE_SECURITY }}
+          OPENCODE_SECURITY: ${{ vars.OPENCODE_SECURITY }}
         run: |
           enabled=false
           token=false
           # OpenCode Security is controlled only by the repository or
           # organization variable. An unset value is disabled.
-          if [ "$OPENCODE_SECURITY_OVERRIDE" = "true" ]; then
+          if [ "$OPENCODE_SECURITY" = "true" ]; then
             enabled=true
           fi
           if [ -n "$OPENCODE_API_KEY" ]; then token=true; fi
