@@ -1,0 +1,11 @@
+{
+  "buildMilliseconds": 10000,
+  "testMilliseconds": 10000,
+  "historyP95Milliseconds": 2,
+  "pluginImportHeapBytes": 67108864,
+  "historyRetainedHeapBytes": 8388608,
+  "packagePackedBytes": 51200,
+  "packageUnpackedBytes": 163840,
+  "packageFileCount": 12,
+  "runtimeDependencyCount": 0
+}

@@ -189,6 +189,12 @@ completions.
   major pi update may require a touch-up. Failures are visible at startup, never
   silent.
 
+## Performance
+
+Build time, test time, suggestion latency, memory, and publish footprint are
+covered by reproducible regression budgets. See
+[the performance audit](docs/PERFORMANCE.md) for local and CI commands.
+
 ## License
 
 MIT
