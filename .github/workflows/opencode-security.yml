@@ -3,6 +3,12 @@ name: Code Foundry
 on:
   pull_request:
     branches: [main]
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - ready_for_review
+      - converted_to_draft
   workflow_dispatch:
 
 permissions:
@@ -14,7 +20,8 @@ jobs:
     if: >-
       vars.CI_BILLING_PAUSED != 'true' &&
       (github.event_name == 'workflow_dispatch' ||
-      startsWith(github.event.pull_request.head.ref, 'release-please--branches--main'))
+      (github.event.pull_request.draft == false &&
+      startsWith(github.event.pull_request.head.ref, 'release-please--branches--main')))
     runs-on: ubuntu-slim
     outputs:
       enabled: ${{ steps.detect.outputs.enabled }}

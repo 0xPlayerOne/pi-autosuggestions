@@ -1,5 +1,7 @@
 # Security Policy
 
+<!-- code-foundry-managed: config-aware-policy -->
+
 ## Supported Versions
 
 The latest commit on `main` receives security patches.
