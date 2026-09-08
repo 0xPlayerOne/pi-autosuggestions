@@ -42,8 +42,8 @@ A reference run on 2026-09-07 using macOS arm64 and Node.js 22.23.1 produced:
 | History lookup p95            | 0.266 ms     | 2 ms         |
 | Standalone plugin import heap | 37,095,200 B | 67,108,864 B |
 | Retained history-scan heap    | 4,888 B      | 8,388,608 B  |
-| Packed package                | 24,209 B     | 51,200 B     |
-| Unpacked package              | 99,586 B     | 163,840 B    |
+| Packed package                | 24,223 B     | 51,200 B     |
+| Unpacked package              | 99,637 B     | 163,840 B    |
 | Published files               | 11           | 12           |
 | Direct runtime dependencies   | 0            | 0            |
 

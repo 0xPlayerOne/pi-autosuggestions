@@ -30,7 +30,7 @@ function run(command, args) {
 }
 
 const build = run('npm', ['run', 'build', '--silent'])
-const tests = run('npm', ['run', 'test:unit', '--silent'])
+const tests = run('npm', ['run', 'test:behavior', '--silent'])
 
 global.gc()
 const heapBeforeImport = process.memoryUsage().heapUsed

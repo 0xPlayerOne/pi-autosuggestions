@@ -46,9 +46,10 @@
     "performance:check": "node --expose-gc scripts/performance.mjs --check",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "prepublishOnly": "npm run build",
-    "test": "npm run test:unit && npm run performance:check",
-    "test:unit": "node --test test/*.test.mjs",
-    "pretest": "npm run build"
+    "test": "npm run test:unit",
+    "pretest:unit": "npm run build",
+    "test:unit": "npm run test:behavior && npm run performance:check",
+    "test:behavior": "node --test test/*.test.mjs"
   },
   "devDependencies": {
     "@earendil-works/pi-coding-agent": "*",
