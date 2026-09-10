@@ -49,6 +49,11 @@ interface EditorInternals {
 
 const DIM = '\x1b[2m'
 const RESET = '\x1b[0m'
+
+function encodeSessionPath(p: string): string {
+  return `--${p.split('/').filter(Boolean).join('-')}--`
+}
+
 /** Set at extension load; used for dynamic completion exec calls. */
 let execApi: ExtensionAPI | undefined
 /** Active pi theme (set at session start) for theme-aware cursor colors. */
@@ -1097,8 +1102,9 @@ class BashInlineEditor extends CustomEditor {
         }
       }
     }
-    this.pathCommandCache = [...names].sort()
-    return this.pathCommandCache
+    const commands = [...names].toSorted()
+    this.pathCommandCache = commands
+    return commands
   }
 
   /** PATH commands starting with the typed command word. */
@@ -1431,10 +1437,9 @@ class BashInlineEditor extends CustomEditor {
     }
     try {
       const sessionsDir = `${homedir()}/.pi/agent/sessions`
-      const encoded = (p: string) => `--${p.split('/').filter(Boolean).join('-')}--`
       let dir: string | undefined
       for (const candidate of [process.cwd(), realpathSync(process.cwd())]) {
-        const path13 = `${sessionsDir}/${encoded(candidate)}`
+        const path13 = `${sessionsDir}/${encodeSessionPath(candidate)}`
         if (existsSync(path13)) {
           dir = path13
           break
@@ -1445,7 +1450,7 @@ class BashInlineEditor extends CustomEditor {
       }
       const files = readdirSync(dir)
         .filter((f) => f.endsWith('.jsonl'))
-        .sort()
+        .toSorted()
         .slice(-5)
       const prompts: string[] = []
       for (const file of files) {
@@ -1476,7 +1481,7 @@ class BashInlineEditor extends CustomEditor {
         }
       }
       // Cross-session entries come before anything typed this session.
-      this.promptHistory = [...prompts.reverse(), ...this.promptHistory]
+      this.promptHistory = [...prompts.toReversed(), ...this.promptHistory]
     } catch {}
   }
 

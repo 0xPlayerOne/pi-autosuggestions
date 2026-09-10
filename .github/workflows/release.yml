@@ -22,13 +22,17 @@ concurrency:
 jobs:
   release:
     name: Release
+    # Release Please consumes no qualification outputs; it runs first so the
+    # qualification below only executes when a release (or a stuck draft) needs
+    # it. Version pull requests keep flowing even when the candidate is broken;
+    # publication stays gated on qualification success in the stage job.
     if: vars.CI_BILLING_PAUSED != 'true' || (github.event_name == 'workflow_dispatch' && inputs['release-while-paused'] == true)
-    uses: 0xPlayerOne/code-foundry/.github/workflows/release.yml@v1.25.3
+    uses: 0xPlayerOne/code-foundry/.github/workflows/release.yml@v1.28.2
     with:
       billing-pause-bypass: ${{ github.event_name == 'workflow_dispatch' && inputs['release-while-paused'] == true }}
       runner: ubuntu-slim
       runtime-repository: 0xPlayerOne/code-foundry
-      runtime-ref: v1.25.3
+      runtime-ref: v1.28.2
     permissions:
       actions: write
       contents: write

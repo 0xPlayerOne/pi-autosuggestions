@@ -43,7 +43,7 @@ jobs:
         with:
           persist-credentials: false
           repository: 0xPlayerOne/code-foundry
-          ref: v1.25.3
+          ref: v1.28.2
           path: .github/.code-foundry
           sparse-checkout: |
             src/lib
@@ -64,7 +64,12 @@ jobs:
   validation:
     name: Validation
     needs: mode
-    if: vars.CI_BILLING_PAUSED != 'true' && github.event_name == 'pull_request' && github.event.pull_request.draft == false
+    # Bot-authored pull requests (Dependabot and friends) validate only on an
+    # explicit ready transition: dependency pushes never allocate validation
+    # runners by themselves. A human pushing to a bot branch also runs, since
+    # the sender is no longer a bot. Release Please heads are managed by the
+    # release workflow and always validate.
+    if: vars.CI_BILLING_PAUSED != 'true' && github.event_name == 'pull_request' && github.event.pull_request.draft == false && (github.event.pull_request.user.type != 'Bot' || github.event.sender.type != 'Bot' || startsWith(github.event.pull_request.head.ref, 'release-please--branches--main'))
     # Reusable workflows can only maintain or reduce the caller job's scopes.
     # The audit tier needs security-events: write for CodeQL uploads.
     permissions:
@@ -72,14 +77,14 @@ jobs:
       contents: read
       packages: read
       security-events: write
-    uses: 0xPlayerOne/code-foundry/.github/workflows/validation.yml@v1.25.3
+    uses: 0xPlayerOne/code-foundry/.github/workflows/validation.yml@v1.28.2
     with:
       mode: ${{ needs.mode.outputs.mode }}
       runtime-repository: 0xPlayerOne/code-foundry
       # Pull requests validate the proposed runtime commit. Scheduled and
       # manually dispatched audits use a separate default-branch-pinned caller,
       # so this caller-selected ref never runs with default-branch cache access.
-      runtime-ref: v1.25.3
+      runtime-ref: v1.28.2
       ci-runner: ubuntu-slim
       test-runner: ubuntu-slim
       unit-runner: ubuntu-slim
@@ -105,10 +110,10 @@ jobs:
       contents: read
       packages: read
       security-events: write
-    uses: 0xPlayerOne/code-foundry/.github/workflows/codeql.yml@v1.25.3
+    uses: 0xPlayerOne/code-foundry/.github/workflows/codeql.yml@v1.28.2
     with:
       runtime-repository: 0xPlayerOne/code-foundry
-      runtime-ref: v1.25.3
+      runtime-ref: v1.28.2
       runner: ubuntu-latest
       rust-shards: '["all"]'
       rust-threads: '1'

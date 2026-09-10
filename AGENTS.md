@@ -17,6 +17,15 @@ They complement `CONTRIBUTING.md`. More specific instructions in nested `AGENTS.
 
 This repository may contain TypeScript, Rust, Python, or any combination of them. Detect the active stack from the files present; do not assume every check applies.
 
+## Contributing back
+
+Consumers are encouraged to help improve this open-source project. Open a small,
+focused pull request for bug fixes, performance improvements, documentation, or
+other narrowly scoped changes. For larger feature requests or architectural
+changes, create an issue first so the proposal can be discussed and scoped.
+Contributions should help make the tool as performant, reliable, and helpful as
+possible for everyone.
+
 ## Read before acting
 
 Before editing:
