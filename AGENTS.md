@@ -94,6 +94,33 @@ them:
 - Keep pull requests focused; merge with the canonical method only after
   required checks pass.
 
+<!-- code-foundry-managed: pull-request-policy -->
+
+## Code Foundry workflow policy (mandatory)
+
+This repository uses the `direct` workflow. Topic pull requests target `main`.
+
+- Open every ordinary pull request as a draft. Use `gh pr create --draft` or
+  set `draft: true` in the GitHub API; never create a ready ordinary pull
+  request as a shortcut.
+- Keep ordinary pull requests in draft while preparing them. The generated
+  Draft Guard converts ready ordinary pull requests to draft when they are
+  opened or reopened, and runner-heavy validation starts only after an
+  explicit `ready_for_review` transition unless `draft_protection: false` is
+  configured for generated callers. That opt-out does not disable Draft Guard
+  or draft-PR automation. Cloudflare reusable callers use
+  `draft-protection: false`.
+- Run local validation and finish review preparation before marking an ordinary
+  pull request ready. Ready pull requests stay ready when new commits arrive,
+  and validation reruns for the current head; draft updates allocate no
+  validation runner until the pull request is ready.
+- This contract is mandatory for every agent scope. Nested `AGENTS.md` files
+  may add stricter rules but must not weaken or replace it.
+- Release Please version pull requests are managed by the Code Foundry release
+  workflow; do not manually change their draft state unless the workflow asks.
+
+<!-- /code-foundry-managed: pull-request-policy -->
+
 ## Toolchain and dependencies
 
 - Follow `toolchain: auto` in `.github/code-foundry.yml`; use native tools by
@@ -122,6 +149,7 @@ node src/runtime.mjs ci unit
 node src/runtime.mjs ci integration
 node src/runtime.mjs ci e2e
 node src/runtime.mjs ci smoke
+node src/runtime.mjs ci eval
 node src/runtime.mjs ci performance
 Security and dependency audits run through the GitHub Security workflow.
 ```
@@ -154,7 +182,7 @@ If a check cannot run, state the exact reason. A skipped check is not a passing 
 - Use per-workflow concurrency groups that cancel superseded runs while allowing independent workflows to run in parallel.
 - Keep setup language-aware and cache dependency downloads by lockfile; do not cache secrets, `node_modules`, virtual environments, or broad build output without a measured reason.
 - Use least-privilege permissions and pin action versions consistently with the template.
-- Keep CI, Test, Security, CodeQL, Draft PR, Release PR, and Release concerns separated.
+- Keep CI, Test, Security, CodeQL, Draft Guard, Draft PR, Release PR, and Release concerns separated.
 - Security and CodeQL may skip when repository visibility or GitHub plan support does not permit them. Do not make an unavailable check required.
 - Optional Turborepo Remote Caching uses `TURBO_TOKEN` and `TURBO_TEAM`; do not add Vercel deployment behavior just to enable caching.
 - Update branch protection when adding or renaming required job checks; verify the actual GitHub status context.

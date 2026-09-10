@@ -9,7 +9,7 @@ codeql_rust_shards: '["all"]'
 codeql_rust_threads: 1
 codeql_rust_max_parallel: 1
 runtime_repository: 0xPlayerOne/code-foundry
-runtime_ref: v1.9.11
+runtime_ref: v1.25.3
 performance_runner: ubuntu-latest
 performance: true
 runner: ubuntu-slim
@@ -41,3 +41,8 @@ release_merge_strategy: squash
 performance_command:
 performance_profile:
 performance_budget_file: performance-budgets.json
+draft_protection: true
+required_capabilities:
+coverage_enforcement: auto
+coverage_metrics: lines
+coverage_report:

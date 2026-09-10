@@ -5,6 +5,7 @@ on:
     branches: [main]
     types:
       - ready_for_review
+      - synchronize
   workflow_dispatch:
 
 permissions:
@@ -13,7 +14,7 @@ permissions:
 jobs:
   detect:
     name: OpenCode Security / Detect
-    if: vars.CI_BILLING_PAUSED != 'true'
+    if: vars.CI_BILLING_PAUSED != 'true' && (github.event_name == 'workflow_dispatch' || (github.event_name == 'pull_request' && github.event.pull_request.draft == false))
     runs-on: ubuntu-slim
     outputs:
       enabled: ${{ steps.detect.outputs.enabled }}

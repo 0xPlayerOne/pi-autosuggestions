@@ -41,12 +41,14 @@ htmlcov/
 artifacts/
 performance-results.json
 performance-results/
+eval-results.json
+eval-results/
 cache/
 !.github/actions/cache/
 !.github/actions/cache/action.yml
 typechain/
 coverage.json
-performance-results/
+.code-foundry/
 tests/.bin/
 **/.app/
 

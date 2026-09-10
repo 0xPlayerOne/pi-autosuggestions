@@ -1,0 +1,22 @@
+name: Verify Code Foundry Release Integrity
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Published immutable release tag to verify.
+        required: true
+        type: string
+permissions:
+  contents: read
+  attestations: read
+jobs:
+  verify:
+    # Enable only after an administrator enables immutable releases. This is a
+    # post-publication verifier, not a substitute for the GitHub repository setting.
+    if: vars.CI_BILLING_PAUSED != 'true' && (vars.REQUIRE_IMMUTABLE_RELEASES == 'true' || github.event_name == 'workflow_dispatch')
+    uses: 0xPlayerOne/code-foundry/.github/workflows/release-integrity.yml@v1.25.3
+    with:
+      runtime-ref: v1.25.3
+      tag: ${{ github.event.release.tag_name || inputs.tag }}
