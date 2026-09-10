@@ -1,0 +1,78 @@
+name: Code Foundry Draft Guard
+
+on:
+  # This workflow runs from the trusted base branch and only reads pull-request
+  # metadata before changing draft state. It never checks out or executes PR code.
+  pull_request_target:
+    branches: [main]
+    types:
+      - opened
+      - reopened
+
+permissions:
+  pull-requests: write
+
+concurrency:
+  group: code-foundry-draft-guard-${{ github.repository }}-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  enforce:
+    name: Draft Guard / Enforce
+    if: vars.CI_BILLING_PAUSED != 'true'
+    runs-on: ubuntu-slim
+    timeout-minutes: 5
+    steps:
+      - name: Keep ordinary pull requests in draft
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EVENT_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          EVENT_UPDATED_AT: ${{ github.event.pull_request.updated_at }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          set -euo pipefail
+          if [ -z "$EVENT_HEAD_SHA" ] || [ -z "$EVENT_UPDATED_AT" ] || [ -z "$PR_NUMBER" ]; then
+            echo '::error title=Draft guard cannot verify event freshness::The pull-request event did not include the required immutable metadata.'
+            exit 1
+          fi
+
+          read -r draft head_ref head_sha updated_at < <(
+            gh api "repos/$GITHUB_REPOSITORY/pulls/$PR_NUMBER" \
+              --jq '[.draft, .head.ref, .head.sha, .updated_at] | @tsv'
+          )
+          if [ -z "$draft" ] || [ -z "$head_ref" ] || [ -z "$head_sha" ] || [ -z "$updated_at" ]; then
+            echo '::error title=Draft guard cannot verify current state::The GitHub API response did not include the required pull-request metadata.'
+            exit 1
+          fi
+
+          # Release Please owns the state of generated version PRs. Its release
+          # workflow deliberately resets and readies these PRs before merging.
+          case "$head_ref" in
+            release-please--branches--main|release-please--branches--main--*)
+              echo "Release Please head $head_ref is managed by the release workflow; leaving its draft state unchanged."
+              exit 0
+              ;;
+          esac
+
+          # A newer state transition superseded this event. Do not undo a
+          # user's later explicit readiness decision with a stale event.
+          if [ "$head_sha" != "$EVENT_HEAD_SHA" ] || [ "$updated_at" != "$EVENT_UPDATED_AT" ]; then
+            echo 'A newer pull-request state or head commit superseded this draft-guard event; leaving the current state unchanged.'
+            exit 0
+          fi
+
+          if [ "$draft" = true ]; then
+            echo "Pull request #$PR_NUMBER is already a draft; no validation state change is needed."
+            exit 0
+          fi
+          if [ "$draft" != false ]; then
+            echo "::error title=Draft guard cannot verify current state::Unexpected draft value: $draft"
+            exit 1
+          fi
+
+          gh api \
+            --method PATCH \
+            "repos/$GITHUB_REPOSITORY/pulls/$PR_NUMBER" \
+            -F draft=true \
+            --silent >/dev/null
+          echo "Converted ordinary pull request #$PR_NUMBER to draft; validation waits for ready_for_review."

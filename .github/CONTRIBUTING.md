@@ -32,6 +32,31 @@ Agents must not:
 - Change branch protections, secrets, deployments, or external systems unless that action is explicitly in scope.
 - Claim completion when tests, deployment checks, or required reviews are still pending.
 
+<!-- code-foundry-managed: pull-request-policy -->
+
+### Pull request readiness (mandatory)
+
+This repository uses the `direct` workflow. Topic pull requests target `main`.
+
+- Open every ordinary pull request as a draft. Use `gh pr create --draft` or
+  set `draft: true` in the GitHub API; never create a ready ordinary pull
+  request as a shortcut.
+- Keep ordinary pull requests in draft while preparing them. The generated
+  Draft Guard converts ready ordinary pull requests to draft when they are
+  opened or reopened, and runner-heavy validation starts only after an
+  explicit `ready_for_review` transition unless `draft_protection: false` is
+  configured for generated callers. That opt-out does not disable Draft Guard
+  or draft-PR automation. Cloudflare reusable callers use
+  `draft-protection: false`.
+- Run local validation and finish review preparation before marking an ordinary
+  pull request ready. Ready pull requests stay ready when new commits arrive,
+  and validation reruns for the current head; draft updates allocate no
+  validation runner until the pull request is ready.
+- Release Please version pull requests are managed by the Code Foundry release
+  workflow; do not manually change their draft state unless the workflow asks.
+
+<!-- /code-foundry-managed: pull-request-policy -->
+
 ## Branching model
 
 ```text
@@ -160,11 +185,11 @@ Keep pull requests focused and reviewable. Include screenshots or recordings for
 | Exact Release Please pull request targeting `main` | Full validation: CI, full tests, Security, and CodeQL, ending in `Validation / Gate`  |
 | Scheduled or manual validation                     | Full audit tier                                                                       |
 | Push to a working branch                           | Draft PR workflow                                                                     |
-| Push to `main`                                     | Release workflow; canonical validation already ran on the merged PR                   |
+| Push to `main`                                     | Release workflow plus default-branch CodeQL scan; validation ran on the merged PR     |
 
-Draft pull requests do not start validation. Marking a pull request ready for review starts the applicable validation tier. Convert it back to draft after an update, then mark it ready again after every update so the required checks attach to the current head. Converting it to draft runs only the lightweight cancellation control.
+Draft pull requests do not start validation unless `draft_protection: false` is configured. The lightweight Draft Guard converts ordinary pull requests opened or reopened while ready back to draft; it never checks out pull-request code and it excludes Release Please version heads, whose release workflow owns their state. Marking a pull request ready for review starts the applicable validation tier, and each new commit on a ready pull request reruns that tier for the current head. Draft updates allocate no validation runner while protection is enabled. Converting a pull request to draft runs only the lightweight cancellation control.
 
-Pull-request validation keys concurrency by event and pull-request head, so a newer update cancels its superseded run. Scheduled and manual audits use a separate caller pinned to the protected default branch; this prevents caller-selected runtime code from executing with default-branch cache access. Both callers use the mode-aware orchestrator, which fans out only the required jobs and concludes with the stable aggregate gate.
+Pull-request validation keys concurrency by event and pull-request head, so a newer update cancels its superseded run. Scheduled and manual audits use a separate caller pinned to the protected default branch; this prevents caller-selected runtime code from executing with default-branch cache access. Pull-request and scheduled/manual callers use the mode-aware orchestrator, which fans out only the required jobs and concludes with the stable aggregate gate. Main pushes run the default-branch CodeQL lane separately.
 
 Required checks are enforced by branch protection rulesets/branch protection. Do not duplicate their checklists in the pull request description; document validation commands and results instead.
 

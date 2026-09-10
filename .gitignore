@@ -46,7 +46,7 @@ cache/
 !.github/actions/cache/action.yml
 typechain/
 coverage.json
-performance-results/
+.code-foundry/
 tests/.bin/
 **/.app/
 
@@ -78,3 +78,7 @@ mise.local.toml
 mise.local.lock
 .mise.local.lock
 *.code-workspace
+
+# Repository-specific rules
+eval-results.json
+eval-results/
