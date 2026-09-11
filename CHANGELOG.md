@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.8.8](https://github.com/0xPlayerOne/pi-autosuggestions/compare/pi-autosuggestions-v0.8.7...pi-autosuggestions-v0.8.8) (2026-09-11)
+
+
+### Maintenance
+
+* **code-foundry:** upgrade runtime to v1.28.11 ([#52](https://github.com/0xPlayerOne/pi-autosuggestions/issues/52)) ([4a7c01e](https://github.com/0xPlayerOne/pi-autosuggestions/commit/4a7c01e6b199bf46fcc94cd7bec92dedd3ad3f2f))
+
 ## [0.8.7](https://github.com/0xPlayerOne/pi-autosuggestions/compare/pi-autosuggestions-v0.8.6...pi-autosuggestions-v0.8.7) (2026-09-11)
 
 
