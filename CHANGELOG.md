@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.8.7](https://github.com/0xPlayerOne/pi-autosuggestions/compare/pi-autosuggestions-v0.8.6...pi-autosuggestions-v0.8.7) (2026-09-11)
+
+
+### Maintenance
+
+* **config:** right-size runner lanes and drop default shard overrides ([#50](https://github.com/0xPlayerOne/pi-autosuggestions/issues/50)) ([b118f01](https://github.com/0xPlayerOne/pi-autosuggestions/commit/b118f01b2fd85babe173fb953bb0f9f22b8dba96))
+
 ## [0.8.6](https://github.com/0xPlayerOne/pi-autosuggestions/compare/pi-autosuggestions-v0.8.5...pi-autosuggestions-v0.8.6) (2026-09-10)
 
 
