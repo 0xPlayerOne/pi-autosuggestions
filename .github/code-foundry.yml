@@ -6,7 +6,7 @@ codeql: auto
 dependency_review: auto
 package_manager: npm
 runtime_repository: 0xPlayerOne/code-foundry
-runtime_ref: v1.28.11
+runtime_ref: v1.28.14
 performance_runner: ubuntu-latest
 performance: true
 runner: ubuntu-slim

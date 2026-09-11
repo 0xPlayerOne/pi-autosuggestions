@@ -43,7 +43,7 @@ jobs:
         with:
           persist-credentials: false
           repository: 0xPlayerOne/code-foundry
-          ref: v1.28.11
+          ref: v1.28.14
           path: .github/.code-foundry
           sparse-checkout: |
             src/lib
@@ -77,14 +77,14 @@ jobs:
       contents: read
       packages: read
       security-events: write
-    uses: 0xPlayerOne/code-foundry/.github/workflows/validation.yml@v1.28.11
+    uses: 0xPlayerOne/code-foundry/.github/workflows/validation.yml@v1.28.14
     with:
       mode: ${{ needs.mode.outputs.mode }}
       runtime-repository: 0xPlayerOne/code-foundry
       # Pull requests validate the proposed runtime commit. Scheduled and
       # manually dispatched audits use a separate default-branch-pinned caller,
       # so this caller-selected ref never runs with default-branch cache access.
-      runtime-ref: v1.28.11
+      runtime-ref: v1.28.14
       ci-runner: ubuntu-slim
       test-runner: ubuntu-slim
       unit-runner: ubuntu-slim
@@ -110,10 +110,10 @@ jobs:
       contents: read
       packages: read
       security-events: write
-    uses: 0xPlayerOne/code-foundry/.github/workflows/codeql.yml@v1.28.11
+    uses: 0xPlayerOne/code-foundry/.github/workflows/codeql.yml@v1.28.14
     with:
       runtime-repository: 0xPlayerOne/code-foundry
-      runtime-ref: v1.28.11
+      runtime-ref: v1.28.14
       runner: ubuntu-latest
       rust-shards: '["all"]'
       rust-threads: '1'
