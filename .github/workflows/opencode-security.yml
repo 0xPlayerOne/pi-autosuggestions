@@ -1,4 +1,4 @@
-name: Code Foundry
+name: Code Foundry Security
 
 on:
   pull_request:
@@ -16,6 +16,7 @@ jobs:
     name: OpenCode Security / Detect
     if: vars.CI_BILLING_PAUSED != 'true' && (github.event_name == 'workflow_dispatch' || (github.event_name == 'pull_request' && github.event.pull_request.draft == false))
     runs-on: ubuntu-slim
+    timeout-minutes: 10
     outputs:
       enabled: ${{ steps.detect.outputs.enabled }}
       token: ${{ steps.detect.outputs.token }}
