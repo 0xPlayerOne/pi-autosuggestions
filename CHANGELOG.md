@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.8.12](https://github.com/0xPlayerOne/pi-autosuggestions/compare/pi-autosuggestions-v0.8.11...pi-autosuggestions-v0.8.12) (2026-09-17)
+
+
+### Maintenance
+
+* adopt Code Foundry runtime v1.30.0 ([#62](https://github.com/0xPlayerOne/pi-autosuggestions/issues/62)) ([0e62885](https://github.com/0xPlayerOne/pi-autosuggestions/commit/0e62885b656b10538e7c93e972209d1d40e648d6))
+
 ## [0.8.11](https://github.com/0xPlayerOne/pi-autosuggestions/compare/pi-autosuggestions-v0.8.10...pi-autosuggestions-v0.8.11) (2026-09-17)
 
 
