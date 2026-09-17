@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.8.11](https://github.com/0xPlayerOne/pi-autosuggestions/compare/pi-autosuggestions-v0.8.10...pi-autosuggestions-v0.8.11) (2026-09-17)
+
+
+### Maintenance
+
+* toolchain-alignment ([#60](https://github.com/0xPlayerOne/pi-autosuggestions/issues/60)) ([311f65e](https://github.com/0xPlayerOne/pi-autosuggestions/commit/311f65e185aa570615d49abe040eb09366868141))
+
 ## [0.8.10](https://github.com/0xPlayerOne/pi-autosuggestions/compare/pi-autosuggestions-v0.8.9...pi-autosuggestions-v0.8.10) (2026-09-17)
 
 
