@@ -32,7 +32,7 @@ jobs:
       billing-pause-bypass: ${{ github.event_name == 'workflow_dispatch' && inputs['release-while-paused'] == true }}
       runner: ubuntu-slim
       runtime-repository: 0xPlayerOne/code-foundry
-      runtime-ref: v1.28.14
+      runtime-ref: v1.29.1
       git-workflow: direct
     permissions:
       actions: write

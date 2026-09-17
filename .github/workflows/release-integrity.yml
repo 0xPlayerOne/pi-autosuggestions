@@ -18,5 +18,5 @@ jobs:
     if: vars.CI_BILLING_PAUSED != 'true' && (vars.REQUIRE_IMMUTABLE_RELEASES == 'true' || github.event_name == 'workflow_dispatch')
     uses: 0xPlayerOne/code-foundry/.github/workflows/release-integrity.yml@v1.28.14
     with:
-      runtime-ref: v1.28.14
+      runtime-ref: v1.29.1
       tag: ${{ github.event.release.tag_name || inputs.tag }}
