@@ -41,7 +41,7 @@
     "build": "tsc -p tsconfig.json",
     "format:check": "oxfmt --check .",
     "fmt": "oxfmt .",
-    "lint": "oxlint",
+    "lint": "oxlint --deny-warnings",
     "performance": "node --expose-gc scripts/performance.mjs",
     "performance:check": "node --expose-gc scripts/performance.mjs --check",
     "typecheck": "tsc -p tsconfig.json --noEmit",
@@ -55,8 +55,8 @@
     "@earendil-works/pi-coding-agent": "*",
     "@earendil-works/pi-tui": "*",
     "@types/node": "^22.0.0",
-    "oxfmt": "^0.66.0",
-    "oxlint": "^1.81.0",
+    "oxfmt": "^0.68.0",
+    "oxlint": "^1.83.0",
     "typescript": "^6.0.3"
   },
   "peerDependencies": {
