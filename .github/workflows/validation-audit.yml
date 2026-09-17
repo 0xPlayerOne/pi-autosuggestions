@@ -24,7 +24,7 @@ jobs:
       contents: read
       packages: read
       security-events: write
-    uses: 0xPlayerOne/code-foundry/.github/workflows/validation.yml@v1.28.14
+    uses: 0xPlayerOne/code-foundry/.github/workflows/validation.yml@v1.29.1
     with:
       mode: audit
       runtime-repository: 0xPlayerOne/code-foundry
