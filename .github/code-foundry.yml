@@ -4,9 +4,9 @@ languages: typescript
 features: all
 codeql: auto
 dependency_review: auto
-package_manager: npm
+package_manager: bun
 runtime_repository: 0xPlayerOne/code-foundry
-runtime_ref: v1.28.14
+runtime_ref: v1.29.1
 performance_runner: ubuntu-latest
 performance: true
 runner: ubuntu-slim
