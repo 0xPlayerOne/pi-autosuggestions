@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.8.10](https://github.com/0xPlayerOne/pi-autosuggestions/compare/pi-autosuggestions-v0.8.9...pi-autosuggestions-v0.8.10) (2026-09-17)
+
+
+### Maintenance
+
+* standardize lint and format toolchain ([#57](https://github.com/0xPlayerOne/pi-autosuggestions/issues/57)) ([ce4ffce](https://github.com/0xPlayerOne/pi-autosuggestions/commit/ce4ffce20fe66603f8b0e64a40b0f2654d4858bd))
+
 ## [0.8.9](https://github.com/0xPlayerOne/pi-autosuggestions/compare/pi-autosuggestions-v0.8.8...pi-autosuggestions-v0.8.9) (2026-09-11)
 
 
