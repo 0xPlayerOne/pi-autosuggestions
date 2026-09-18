@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.8.13](https://github.com/0xPlayerOne/pi-autosuggestions/compare/pi-autosuggestions-v0.8.12...pi-autosuggestions-v0.8.13) (2026-09-18)
+
+
+### Bug Fixes
+
+* complete fleet toolchain alignment ([#64](https://github.com/0xPlayerOne/pi-autosuggestions/issues/64)) ([4f71528](https://github.com/0xPlayerOne/pi-autosuggestions/commit/4f71528d11b7b1e986dcfdcc51be92631eba36b5))
+
 ## [0.8.12](https://github.com/0xPlayerOne/pi-autosuggestions/compare/pi-autosuggestions-v0.8.11...pi-autosuggestions-v0.8.12) (2026-09-17)
 
 
