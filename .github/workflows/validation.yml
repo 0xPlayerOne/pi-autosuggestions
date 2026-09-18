@@ -43,7 +43,7 @@ jobs:
         with:
           persist-credentials: false
           repository: 0xPlayerOne/code-foundry
-          ref: v1.28.14
+          ref: v1.30.0
           path: .github/.code-foundry
           sparse-checkout: |
             src/lib
