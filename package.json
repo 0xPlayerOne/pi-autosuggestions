@@ -1,7 +1,7 @@
 {
   "name": "pi-autosuggestions",
   "version": "0.8.14",
-  "description": "zsh-autosuggestions-style ghost completions for the pi coding agent \u2014 history-based inline suggestions, path completion in bash mode, blinking beam cursor",
+  "description": "zsh-autosuggestions-style ghost completions for the pi coding agent — history-based inline suggestions, path completion in bash mode, blinking beam cursor",
   "keywords": [
     "autocomplete",
     "autosuggestions",
@@ -63,6 +63,9 @@
     "@earendil-works/pi-coding-agent": "*",
     "@earendil-works/pi-tui": "*"
   },
+  "overrides": {
+    "undici": "^8.10.2"
+  },
   "engines": {
     "node": "24.18.0"
   },
@@ -71,8 +74,5 @@
     "extensions": [
       "./dist/autosuggestions.js"
     ]
-  },
-  "overrides": {
-    "undici": "^8.10.2"
   }
 }
