@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.8.15](https://github.com/0xPlayerOne/pi-autosuggestions/compare/pi-autosuggestions-v0.8.14...pi-autosuggestions-v0.8.15) (2026-09-29)
+
+
+### Maintenance
+
+* override undici to 8.10.2 for the two high advisories ([#72](https://github.com/0xPlayerOne/pi-autosuggestions/issues/72)) ([91b5bcf](https://github.com/0xPlayerOne/pi-autosuggestions/commit/91b5bcfc5941f55aeea0059806882aca3cc89d46))
+
 ## [0.8.14](https://github.com/0xPlayerOne/pi-autosuggestions/compare/pi-autosuggestions-v0.8.13...pi-autosuggestions-v0.8.14) (2026-09-29)
 
 
