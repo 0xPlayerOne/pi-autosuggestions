@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.8.19](https://github.com/0xPlayerOne/pi-autosuggestions/compare/pi-autosuggestions-v0.8.18...pi-autosuggestions-v0.8.19) (2026-09-30)
+
+
+### Bug Fixes
+
+* **editor:** stop the software-blink ghost from overflowing the terminal ([#78](https://github.com/0xPlayerOne/pi-autosuggestions/issues/78)) ([c1854a8](https://github.com/0xPlayerOne/pi-autosuggestions/commit/c1854a826913a1e37de1cf2d7062fd89d870e4cc)), closes [#67](https://github.com/0xPlayerOne/pi-autosuggestions/issues/67)
+
 ## [0.8.18](https://github.com/0xPlayerOne/pi-autosuggestions/compare/pi-autosuggestions-v0.8.17...pi-autosuggestions-v0.8.18) (2026-09-30)
 
 
