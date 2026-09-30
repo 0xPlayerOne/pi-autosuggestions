@@ -1,6 +1,5 @@
 # Agent Instructions
 
-
 <!-- code-foundry-managed: config-aware-policy -->
 
 These instructions are the repository-level operating contract for coding agents, including Hermes, OpenCode, and other automation.

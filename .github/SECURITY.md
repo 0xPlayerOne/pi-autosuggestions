@@ -1,6 +1,5 @@
 # Security Policy
 
-
 <!-- code-foundry-managed: config-aware-policy -->
 
 ## Supported Versions
