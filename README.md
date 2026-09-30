@@ -184,10 +184,13 @@ completions.
 
 ## Compatibility
 
-- Built and tested against **pi 0.85.0**
-- Hooks pi-tui editor internals that are private in the type declarations; a
-  major pi update may require a touch-up. Failures are visible at startup, never
-  silent.
+- Built and tested against **pi 0.99.1** (`@earendil-works/pi-coding-agent` and
+  `@earendil-works/pi-tui`, both declared as peers)
+- Hooks pi-tui editor internals that are private in the type declarations, so
+  TypeScript cannot catch a rename or signature change on a pi update.
+  `test/editor.test.mjs` instantiates the real editor and asserts that contract,
+  so a pi upgrade that moves the internals fails the test run instead of
+  surfacing later as a broken suggestion.
 
 ## Performance
 
