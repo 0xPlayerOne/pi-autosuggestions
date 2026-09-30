@@ -12,6 +12,10 @@ Quick links: [Code of Conduct](./CODE_OF_CONDUCT.md) · [Security Policy](./SECU
 
 [Agent contract](#agent-operating-contract) · [Branches](#branching-model) · [Setup](#before-you-start) · [Validation](#local-validation) · [Internal](#internal-contribution-workflow) · [External](#external-contribution-workflow) · [Pull requests](#pull-request-standards) · [Reviews](#review-and-merge-protocol) · [Security](#security-and-emergencies)
 
+<!-- /code-foundry-managed: config-aware-policy -->
+
+<!-- code-foundry-managed: agent-operating-contract -->
+
 ## Agent operating contract
 
 Agents must follow these rules before changing code:
@@ -31,6 +35,8 @@ Agents must not:
 - Bypass hooks or required checks to hide a failure.
 - Change branch protections, secrets, deployments, or external systems unless that action is explicitly in scope.
 - Claim completion when tests, deployment checks, or required reviews are still pending.
+
+<!-- /code-foundry-managed: agent-operating-contract -->
 
 <!-- code-foundry-managed: pull-request-policy -->
 
@@ -57,6 +63,8 @@ This repository uses the `direct` workflow. Topic pull requests target `main`.
 
 <!-- /code-foundry-managed: pull-request-policy -->
 
+<!-- code-foundry-managed: branching-model -->
+
 ## Branching model
 
 ```text
@@ -74,6 +82,10 @@ docs/*  test/*  refactor/*         │
 | `feat/*`, `fix/*`, `chore/*`, `refactor/*`, `docs/*`, `test/*` | Focused work             | Branch from `main`; keep changes small and reviewable. |
 
 The Git workflow is `direct`: topic branches **squash** directly into `main`, and the Release Please version PR **squashes** into `main` (`release_merge_strategy: squash`). Release automation never defaults to a merge method and never merges with `--admin`; `code-foundry doctor` and `code-foundry sync` fail closed on any other release merge strategy. This repository has one protected integration and release branch: `main`.
+
+<!-- /code-foundry-managed: branching-model -->
+
+<!-- code-foundry-managed: before-you-start -->
 
 ## Before you start
 
@@ -97,6 +109,10 @@ git switch -c feat/short-description
 
 If the worktree is dirty, stop and understand the existing changes before switching branches or editing overlapping files.
 
+<!-- /code-foundry-managed: before-you-start -->
+
+<!-- code-foundry-managed: local-validation -->
+
 ## Local validation
 
 The repository runtime detects supported tools and skips checks that do not apply:
@@ -111,6 +127,10 @@ Security and dependency audits run through the GitHub Security workflow.
 ```
 
 Run the checks relevant to the change. For a release or security-sensitive change, run the complete set. Record the commands and results in the pull request.
+
+<!-- /code-foundry-managed: local-validation -->
+
+<!-- code-foundry-managed: internal-contribution-workflow -->
 
 ## Internal contribution workflow
 
@@ -134,6 +154,10 @@ For maintainers, trusted contributors, and automation agents:
 9. Address review feedback and failed checks on the same branch.
 10. Merge with a squash after required checks pass and the change is ready; feature PRs land on `main` with squash merges.
 
+<!-- /code-foundry-managed: internal-contribution-workflow -->
+
+<!-- code-foundry-managed: internal-agent-handoff -->
+
 ### Internal agent handoff
 
 Every agent handoff should state:
@@ -146,6 +170,10 @@ Skipped: checks skipped and why
 Risks: known limitations or follow-up work
 Branch/PR: branch name and pull request link
 ```
+
+<!-- /code-foundry-managed: internal-agent-handoff -->
+
+<!-- code-foundry-managed: external-contribution-workflow -->
 
 ## External contribution workflow
 
@@ -163,6 +191,10 @@ For contributors who do not have direct write access:
 
 External contributors should never need repository secrets or production access to validate a normal change.
 
+<!-- /code-foundry-managed: external-contribution-workflow -->
+
+<!-- code-foundry-managed: pull-request-standards -->
+
 ## Pull request standards
 
 Every pull request should make these questions easy to answer:
@@ -175,6 +207,10 @@ Every pull request should make these questions easy to answer:
 - Which files or areas deserve focused review?
 
 Keep pull requests focused and reviewable. Include screenshots or recordings for user-facing changes. Link related issues and use `Closes #123` when appropriate. Complete the [pull request template](./PULL_REQUEST_TEMPLATE.md).
+
+<!-- /code-foundry-managed: pull-request-standards -->
+
+<!-- code-foundry-managed: workflow-and-check-behavior -->
 
 ## Workflow and check behavior
 
@@ -199,6 +235,10 @@ Use Conventional Commits so the release automation can determine the next versio
 
 Security checks can be skipped when repository visibility or the GitHub plan does not support a feature. A skipped optional check must not be configured as a required status check.
 
+<!-- /code-foundry-managed: workflow-and-check-behavior -->
+
+<!-- code-foundry-managed: review-and-merge-protocol -->
+
 ## Review and merge protocol
 
 | Change                    | Target | Merge method                      | Merge gate                              |
@@ -207,6 +247,10 @@ Security checks can be skipped when repository visibility or the GitHub plan doe
 | Release Please version PR | `main` | Squash (`release_merge_strategy`) | Validation gate and release policy pass |
 
 Reviewers focus on correctness, security, maintainability, test coverage, operational impact, and compatibility. Authors remain responsible for responding to feedback and verifying the final commit.
+
+<!-- /code-foundry-managed: review-and-merge-protocol -->
+
+<!-- code-foundry-managed: security-and-emergencies -->
 
 ## Security and emergencies
 
@@ -221,3 +265,5 @@ For an urgent production or security issue:
 5. Record follow-up work, remediation, and rollback information.
 
 CI bypasses are for documented infrastructure emergencies only and require a follow-up fix. Never use a bypass to hide a code or test failure.
+
+<!-- /code-foundry-managed: security-and-emergencies -->

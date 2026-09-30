@@ -6,6 +6,10 @@ These instructions are the repository-level operating contract for coding agents
 
 They complement `CONTRIBUTING.md`. More specific instructions in nested `AGENTS.md` files and project documentation take precedence for their directory.
 
+<!-- /code-foundry-managed: config-aware-policy -->
+
+<!-- code-foundry-managed: mission -->
+
 ## Mission
 
 - Keep formatting, linting, type checking, builds, tests, and coverage reproducible locally and in CI.
@@ -17,6 +21,10 @@ They complement `CONTRIBUTING.md`. More specific instructions in nested `AGENTS.
 
 This repository may contain TypeScript, Rust, Python, or any combination of them. Detect the active stack from the files present; do not assume every check applies.
 
+<!-- /code-foundry-managed: mission -->
+
+<!-- code-foundry-managed: contributing-back -->
+
 ## Contributing back
 
 Consumers are encouraged to help improve this open-source project. Open a small,
@@ -25,6 +33,10 @@ other narrowly scoped changes. For larger feature requests or architectural
 changes, create an issue first so the proposal can be discussed and scoped.
 Contributions should help make the tool as performant, reliable, and helpful as
 possible for everyone.
+
+<!-- /code-foundry-managed: contributing-back -->
+
+<!-- code-foundry-managed: read-before-acting -->
 
 ## Read before acting
 
@@ -45,6 +57,10 @@ Before editing:
 
 If the worktree is dirty, preserve existing changes and avoid overlapping edits until their ownership is clear.
 
+<!-- /code-foundry-managed: read-before-acting -->
+
+<!-- code-foundry-managed: priorities -->
+
 ## Priorities
 
 When instructions conflict, use this order:
@@ -57,6 +73,10 @@ When instructions conflict, use this order:
 
 Ask for clarification when a missing decision would materially change the implementation. Otherwise make the smallest reasonable assumption and document it.
 
+<!-- /code-foundry-managed: priorities -->
+
+<!-- code-foundry-managed: safety-boundaries -->
+
 ## Safety boundaries
 
 - Do not discard, reset, overwrite, or rewrite user-owned changes.
@@ -67,6 +87,10 @@ Ask for clarification when a missing decision would materially change the implem
 - Do not bypass hooks, tests, review requirements, or required checks to hide a failure.
 - Do not claim completion while required validation, review, deployment, or user decisions remain pending.
 - Publishing, committing, or opening a pull request requires explicit task scope or user authorization.
+
+<!-- /code-foundry-managed: safety-boundaries -->
+
+<!-- code-foundry-managed: standard-workflow -->
 
 ## Standard workflow
 
@@ -81,6 +105,10 @@ Ask for clarification when a missing decision would materially change the implem
 9. Report what changed, exact checks and results, skipped checks with reasons, risks, and remaining work.
 
 For normal feature work, branch from `main` and target pull requests at `main`. Treat `main` as the protected release branch. Follow `.github/CONTRIBUTING.md` for the complete internal and external contribution flow.
+
+<!-- /code-foundry-managed: standard-workflow -->
+
+<!-- code-foundry-managed: git-workflow-and-merging -->
 
 ## Git workflow and merging
 
@@ -102,6 +130,8 @@ them:
   Please depends on them to version releases.
 - Keep pull requests focused; merge with the canonical method only after
   required checks pass.
+
+<!-- /code-foundry-managed: git-workflow-and-merging -->
 
 <!-- code-foundry-managed: pull-request-policy -->
 
@@ -130,6 +160,8 @@ This repository uses the `direct` workflow. Topic pull requests target `main`.
 
 <!-- /code-foundry-managed: pull-request-policy -->
 
+<!-- code-foundry-managed: toolchain-and-dependencies -->
+
 ## Toolchain and dependencies
 
 - Follow `toolchain: auto` in `.github/code-foundry.yml`; use native tools by
@@ -144,6 +176,10 @@ This repository uses the `direct` workflow. Topic pull requests target `main`.
 - Use Cargo commands and the committed Cargo lockfile for Rust projects.
 - Do not mix package managers or regenerate lockfiles as a side effect.
 - Keep dependency additions narrowly scoped and explain security, licensing, and runtime impact.
+
+<!-- /code-foundry-managed: toolchain-and-dependencies -->
+
+<!-- code-foundry-managed: validation -->
 
 ## Validation
 
@@ -175,6 +211,10 @@ At minimum:
 
 If a check cannot run, state the exact reason. A skipped check is not a passing check.
 
+<!-- /code-foundry-managed: validation -->
+
+<!-- code-foundry-managed: tests-and-coverage -->
+
 ## Tests and coverage
 
 - Add or update tests for behavior changes and regressions.
@@ -182,6 +222,10 @@ If a check cannot run, state the exact reason. A skipped check is not a passing 
 - Preserve project-specific coverage thresholds; do not lower them to make CI green.
 - Keep test data deterministic and remove secrets from logs and fixtures.
 - Use the narrowest test command while iterating, then run the affected package or workspace suite.
+
+<!-- /code-foundry-managed: tests-and-coverage -->
+
+<!-- code-foundry-managed: github-workflows-and-configuration -->
 
 ## GitHub workflows and configuration
 
@@ -196,12 +240,20 @@ If a check cannot run, state the exact reason. A skipped check is not a passing 
 - Optional Turborepo Remote Caching uses `TURBO_TOKEN` and `TURBO_TEAM`; do not add Vercel deployment behavior just to enable caching.
 - Update branch protection when adding or renaming required job checks; verify the actual GitHub status context.
 
+<!-- /code-foundry-managed: github-workflows-and-configuration -->
+
+<!-- code-foundry-managed: documentation-and-generated-files -->
+
 ## Documentation and generated files
 
 - Update documentation when behavior, setup, configuration, commands, or operational procedures change.
 - Keep `.env.example` limited to variable names and safe placeholders.
 - Do not commit build output, caches, coverage output, dependency directories, generated credentials, or temporary files.
 - Preserve formatting and line-ending conventions from `.editorconfig` and `.gitattributes`.
+
+<!-- /code-foundry-managed: documentation-and-generated-files -->
+
+<!-- code-foundry-managed: completion-report -->
 
 ## Completion report
 
@@ -217,3 +269,5 @@ Branch/PR:
 ```
 
 Use exact command names and outcomes. Mention external changes separately from local changes, and distinguish completed work from recommendations.
+
+<!-- /code-foundry-managed: completion-report -->
