@@ -1,5 +1,26 @@
 # Changelog
 
+## [0.8.16](https://github.com/0xPlayerOne/pi-autosuggestions/compare/pi-autosuggestions-v0.8.15...pi-autosuggestions-v0.8.16) (2026-09-29)
+
+
+### Maintenance
+
+* **code-foundry:** upgrade runtime to v1.36.4 ([#71](https://github.com/0xPlayerOne/pi-autosuggestions/issues/71)) ([95c5781](https://github.com/0xPlayerOne/pi-autosuggestions/commit/95c5781db6e090d6f4b1c81f9fd0fcf3093f0a62))
+
+## [0.8.15](https://github.com/0xPlayerOne/pi-autosuggestions/compare/pi-autosuggestions-v0.8.14...pi-autosuggestions-v0.8.15) (2026-09-29)
+
+
+### Maintenance
+
+* override undici to 8.10.2 for the two high advisories ([#72](https://github.com/0xPlayerOne/pi-autosuggestions/issues/72)) ([91b5bcf](https://github.com/0xPlayerOne/pi-autosuggestions/commit/91b5bcfc5941f55aeea0059806882aca3cc89d46))
+
+## [0.8.14](https://github.com/0xPlayerOne/pi-autosuggestions/compare/pi-autosuggestions-v0.8.13...pi-autosuggestions-v0.8.14) (2026-09-29)
+
+
+### Maintenance
+
+* **code-foundry:** upgrade runtime to v1.35.0 ([#69](https://github.com/0xPlayerOne/pi-autosuggestions/issues/69)) ([df00219](https://github.com/0xPlayerOne/pi-autosuggestions/commit/df002191fa92e79e06ecbeab534bc3c10b542cdc))
+
 ## [0.8.13](https://github.com/0xPlayerOne/pi-autosuggestions/compare/pi-autosuggestions-v0.8.12...pi-autosuggestions-v0.8.13) (2026-09-18)
 
 

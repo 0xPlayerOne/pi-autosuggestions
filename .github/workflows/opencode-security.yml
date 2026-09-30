@@ -14,7 +14,13 @@ permissions:
 jobs:
   detect:
     name: OpenCode Security / Detect
-    if: vars.CI_BILLING_PAUSED != 'true' && (github.event_name == 'workflow_dispatch' || (github.event_name == 'pull_request' && github.event.pull_request.draft == false))
+    # The OPENCODE_SECURITY repository or organization variable is the only
+    # enablement control, so gate the detector itself on it: a disabled
+    # repository must not allocate a runner just to report that it is off.
+    if: >-
+      vars.CI_BILLING_PAUSED != 'true' &&
+      vars.OPENCODE_SECURITY == 'true' &&
+      (github.event_name == 'workflow_dispatch' || (github.event_name == 'pull_request' && github.event.pull_request.draft == false))
     runs-on: ubuntu-slim
     timeout-minutes: 10
     outputs:
