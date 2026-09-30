@@ -1022,10 +1022,14 @@ class BashInlineEditor extends CustomEditor {
     }
     const ghost = this.activeGhost()
     if (ghost) {
-      // Fallback (software blink): ghost chars fill the padding.
+      // Fallback (software blink): ghost chars fill the padding. The beam is
+      // emitted as its own cell, so the ghost only gets the padding — the
+      // cursor cell is already spoken for. Budgeting `pad + 1` here let a
+      // full-width ghost run one column past the terminal, which aborts pi's
+      // render loop (issue #67).
       const remainder = ghost.suggestion.slice(ghost.typed.length)
       const pad = / *$/.exec(row.slice(match.index + match[0].length))?.[0].length ?? 0
-      const avail = pad + 1
+      const avail = Math.max(0, pad)
       let used = 0
       const ghostCells: string[] = []
       for (const g of remainder) {

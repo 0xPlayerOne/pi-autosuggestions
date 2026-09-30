@@ -18,7 +18,7 @@ process.env.HOME = home
 process.env.USERPROFILE = home
 
 const root = join(import.meta.dirname, '..')
-const { TuiMainScreen, Editor } = await import('@earendil-works/pi-tui')
+const { TuiMainScreen, Editor, visibleWidth } = await import('@earendil-works/pi-tui')
 const loadExtension = (await import(join(root, 'dist/autosuggestions.js'))).default
 
 const theme = { borderColor: (str) => str, selectList: {} }
@@ -41,11 +41,15 @@ const pi = {
 loadExtension(pi)
 assert.equal(typeof onSessionStart, 'function', 'extension did not register session_start')
 
-/** Build an editor the way pi hands one to the custom component. */
-function createEditor() {
+/**
+ * Build an editor the way pi hands one to the custom component.
+ * `hardwareCursor: false` models the transient state the editor can be in
+ * right after a pi `/reload`, which selects the software-blink render path.
+ */
+function createEditor({ columns = 80, hardwareCursor = true } = {}) {
   const written = []
   const terminal = {
-    columns: 80,
+    columns,
     rows: 24,
     hideCursor() {},
     showCursor() {},
@@ -59,7 +63,9 @@ function createEditor() {
   onSessionStart({}, { ui: { setEditorComponent: (fn) => (factory = fn) } })
   assert.equal(typeof factory, 'function', 'extension did not install an editor component')
 
-  return { editor: factory(tui, theme, keybindings), tui, written }
+  const editor = factory(tui, theme, keybindings)
+  tui.setShowHardwareCursor(hardwareCursor)
+  return { editor, tui, written }
 }
 
 /** The dim sequence the editor wraps ghost text in. */
@@ -68,6 +74,19 @@ const DIM = /\x1b\[2m/
 // oxlint-disable-next-line no-control-regex -- matching ANSI escape output requires control characters
 const ANSI = /\x1b\[[0-9;?]*[a-zA-Z]|\x1b\][^\x07\x1b]*(?:\x07|\x1b\\)/g
 const stripAnsi = (str) => str.replaceAll(ANSI, '')
+
+/**
+ * pi aborts its render loop when any line is wider than the terminal, so
+ * assert the whole frame, not just the ghost row.
+ */
+function assertFits(editor, width) {
+  for (const [index, row] of editor.render(width).entries()) {
+    assert.ok(
+      visibleWidth(row) <= width,
+      `row ${index} is ${visibleWidth(row)} cells wide, exceeding the ${width}-cell terminal`
+    )
+  }
+}
 
 describe('pi/pi-tui contract', () => {
   it('exposes the editor internals the extension shadows', () => {
@@ -165,5 +184,52 @@ describe('custom editor', () => {
     editor.handleInput('\x1b')
     const dismissed = editor.render(80).join('')
     assert.doesNotMatch(dismissed, /status/, 'escape did not dismiss the ghost')
+  })
+})
+
+// Issue #67: pi enforces that every rendered line fits the terminal and aborts
+// the render loop (writing pi-tui-crash.log) when one does not. The
+// software-blink fallback budgets the ghost against `pad + 1` but also emits
+// the beam as its own cell, so a ghost long enough to reach the end of the line
+// came out one column too wide.
+describe('render width (issue #67)', () => {
+  /** A history entry whose ghost fills the line from a one-character prefix. */
+  function fillTheLine(width, hardwareCursor) {
+    const { editor } = createEditor({ columns: width, hardwareCursor })
+    editor.onSubmit = () => {}
+    editor.onSubmit('r' + 'x'.repeat(width - 1))
+    editor.setText('r')
+    return editor
+  }
+
+  for (const hardwareCursor of [false, true]) {
+    const path = hardwareCursor ? 'hardware-cursor path' : 'software-blink fallback'
+    it(`keeps a full-width ghost within the terminal on the ${path}`, () => {
+      // Width 87 with an 86-character ghost is the case from the report.
+      assertFits(fillTheLine(87, hardwareCursor), 87)
+    })
+
+    it(`keeps a full-width ghost within a narrow terminal on the ${path}`, () => {
+      assertFits(fillTheLine(40, hardwareCursor), 40)
+    })
+
+    it(`keeps a ghost with no padding on the ${path}`, () => {
+      // A ghost that exactly fills the line leaves no trailing pad at all.
+      const { editor } = createEditor({ columns: 20, hardwareCursor })
+      editor.onSubmit = () => {}
+      editor.onSubmit('r' + 'y'.repeat(19))
+      editor.setText('r')
+      assertFits(editor, 20)
+    })
+  }
+
+  it('does not overflow when the ghost is longer than the terminal', () => {
+    for (const hardwareCursor of [false, true]) {
+      const { editor } = createEditor({ columns: 30, hardwareCursor })
+      editor.onSubmit = () => {}
+      editor.onSubmit('r' + 'z'.repeat(200))
+      editor.setText('r')
+      assertFits(editor, 30)
+    }
   })
 })
