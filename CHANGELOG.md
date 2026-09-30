@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.8.18](https://github.com/0xPlayerOne/pi-autosuggestions/compare/pi-autosuggestions-v0.8.17...pi-autosuggestions-v0.8.18) (2026-09-30)
+
+
+### Maintenance
+
+* **deps:** update pi to 0.99.1 and pin the editor contract in tests ([#76](https://github.com/0xPlayerOne/pi-autosuggestions/issues/76)) ([74f53df](https://github.com/0xPlayerOne/pi-autosuggestions/commit/74f53dfecad4cb16c86720de0f9ab471d51c0c6a))
+
 ## [0.8.17](https://github.com/0xPlayerOne/pi-autosuggestions/compare/pi-autosuggestions-v0.8.16...pi-autosuggestions-v0.8.17) (2026-09-30)
 
 
