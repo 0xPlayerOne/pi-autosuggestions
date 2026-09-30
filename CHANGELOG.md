@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.8.17](https://github.com/0xPlayerOne/pi-autosuggestions/compare/pi-autosuggestions-v0.8.16...pi-autosuggestions-v0.8.17) (2026-09-30)
+
+
+### Maintenance
+
+* **ci:** switch Dependabot to bun ecosystem for bun.lock repo ([#68](https://github.com/0xPlayerOne/pi-autosuggestions/issues/68)) ([629b0aa](https://github.com/0xPlayerOne/pi-autosuggestions/commit/629b0aaac7afead06e2952a93ab6e49f1cc9b01f))
+
 ## [0.8.16](https://github.com/0xPlayerOne/pi-autosuggestions/compare/pi-autosuggestions-v0.8.15...pi-autosuggestions-v0.8.16) (2026-09-29)
 
 
