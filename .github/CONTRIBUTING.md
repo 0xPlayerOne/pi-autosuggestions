@@ -221,7 +221,7 @@ Keep pull requests focused and reviewable. Include screenshots or recordings for
 | Exact Release Please pull request targeting `main` | Full validation: CI, full tests, Security, and CodeQL, ending in `Validation / Gate`  |
 | Scheduled or manual validation                     | Full audit tier                                                                       |
 | Push to a working branch                           | Draft PR workflow                                                                     |
-| Push to `main`                                     | Release workflow plus default-branch CodeQL scan; validation ran on the merged PR     |
+| Push to `main`                                     | Release workflow; CodeQL skips release-only merges (audit covers drift)               |
 
 Draft pull requests do not start validation unless `draft_protection: false` is configured. The lightweight Draft Guard converts ordinary pull requests opened or reopened while ready back to draft; it never checks out pull-request code and it excludes Release Please version heads, whose release workflow owns their state. Marking a pull request ready for review starts the applicable validation tier, and each new commit on a ready pull request reruns that tier for the current head. Draft updates allocate no validation runner while protection is enabled. Converting a pull request to draft runs only the lightweight cancellation control.
 
