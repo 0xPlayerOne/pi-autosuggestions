@@ -16,7 +16,10 @@ permissions: {}
 # Superseded PR updates cancel the previous run.
 concurrency:
   group: code-foundry-validation-${{ github.event_name }}-${{ github.event.pull_request.head.repo.full_name || github.repository }}-${{ github.event.pull_request.head.ref || github.ref_name }}
-  cancel-in-progress: true
+  # Superseded pull-request runs are cancelled so the newest head owns the
+  # group; push and scheduled runs queue instead, because cancelling a main
+  # push can drop default-branch analysis or release-adjacent work.
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   mode:
@@ -43,7 +46,7 @@ jobs:
         with:
           persist-credentials: false
           repository: 0xPlayerOne/code-foundry
-          ref: v1.41.0
+          ref: v1.44.3
           path: .github/.code-foundry
           sparse-checkout: |
             src/lib
@@ -77,14 +80,14 @@ jobs:
       contents: read
       packages: read
       security-events: write
-    uses: 0xPlayerOne/code-foundry/.github/workflows/validation.yml@v1.41.0
+    uses: 0xPlayerOne/code-foundry/.github/workflows/validation.yml@v1.44.3
     with:
       mode: ${{ needs.mode.outputs.mode }}
       runtime-repository: 0xPlayerOne/code-foundry
       # Pull requests validate the proposed runtime commit. Scheduled and
       # manually dispatched audits use a separate default-branch-pinned caller,
       # so this caller-selected ref never runs with default-branch cache access.
-      runtime-ref: v1.41.0
+      runtime-ref: v1.44.3
       ci-runner: ubuntu-slim
       test-runner: ubuntu-slim
       unit-runner: ubuntu-slim
@@ -95,6 +98,10 @@ jobs:
       rust-shards: '["all"]'
       rust-threads: '1'
       rust-max-parallel: 1
+      # The sync renderer rewrites both values from the e2e_shards config key;
+      # the defaults keep repositories without that key on one unsharded job.
+      e2e-shard-list: '1'
+      e2e-total-shards: '1'
     secrets:
       TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
       NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
@@ -115,10 +122,10 @@ jobs:
       contents: read
       packages: read
       security-events: write
-    uses: 0xPlayerOne/code-foundry/.github/workflows/codeql.yml@v1.41.0
+    uses: 0xPlayerOne/code-foundry/.github/workflows/codeql.yml@v1.44.3
     with:
       runtime-repository: 0xPlayerOne/code-foundry
-      runtime-ref: v1.41.0
+      runtime-ref: v1.44.3
       runner: ubuntu-latest
       rust-shards: '["all"]'
       rust-threads: '1'

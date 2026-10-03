@@ -11,6 +11,11 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: code-foundry-opencode-security-${{ github.event_name }}-${{ github.event.pull_request.number || github.ref }}
+  # Only superseded pull-request scans are cancelled; dispatches queue.
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
   detect:
     name: OpenCode Security / Detect
