@@ -211,6 +211,14 @@ At minimum:
 
 If a check cannot run, state the exact reason. A skipped check is not a passing check.
 
+The generated `.githooks/pre-commit` gate is change-aware so parallel work on a
+shared checkout is not serialized behind repository-wide checks. It blocks
+whitespace errors, formats and lints only staged files, runs the project's
+type-check command only when typed sources or compiler configuration are
+staged, and does not build unless `pre_commit_build: true` is set. Passing the
+hook is not full validation: run the broader checks above before opening or
+readying a pull request.
+
 <!-- /code-foundry-managed: validation -->
 
 <!-- code-foundry-managed: tests-and-coverage -->
@@ -232,7 +240,8 @@ If a check cannot run, state the exact reason. A skipped check is not a passing 
 - Keep workflows concise, independently runnable, and safe to re-run.
 - Use `push` for `main` and `pull_request` for `main` unless a workflow has a documented event-specific reason.
 - Give workflows clear names and jobs concise names; avoid repeating the workflow name in the job name.
-- Use per-workflow concurrency groups that cancel superseded runs while allowing independent workflows to run in parallel.
+- Use per-workflow concurrency groups keyed by pull request or ref that cancel superseded pull-request runs while allowing independent workflows to run in parallel. Do not cancel in progress for pushes to `main`, release, publication, or deployment runs; let them queue.
+- Do not put `always()` on heavy jobs: it keeps a cancelled run alive and holding its concurrency group. Use `!cancelled()` for jobs that must run after upstream failures, and keep `always()` for lightweight aggregate gates only.
 - Keep setup language-aware and cache dependency downloads by lockfile; do not cache secrets, `node_modules`, virtual environments, or broad build output without a measured reason.
 - Use least-privilege permissions and pin action versions consistently with the template.
 - Keep CI, Test, Security, CodeQL, Draft Guard, Draft PR, Release PR, and Release concerns separated.
