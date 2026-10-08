@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.8.26](https://github.com/0xPlayerOne/pi-autosuggestions/compare/pi-autosuggestions-v0.8.25...pi-autosuggestions-v0.8.26) (2026-10-08)
+
+
+### Maintenance
+
+* **deps:** build against pi 1.1.0 ([#93](https://github.com/0xPlayerOne/pi-autosuggestions/issues/93)) ([9151da1](https://github.com/0xPlayerOne/pi-autosuggestions/commit/9151da11ed2daf518a9cc84edb4ac250beb7a661))
+
 ## [0.8.25](https://github.com/0xPlayerOne/pi-autosuggestions/compare/pi-autosuggestions-v0.8.24...pi-autosuggestions-v0.8.25) (2026-10-08)
 
 
