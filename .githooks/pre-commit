@@ -6,6 +6,46 @@ if [ -z "$(git diff --cached --name-only)" ]; then
   exit 0
 fi
 
+# core.hooksPath names a single directory, so pointing it at .githooks would
+# silence every machine-level hook behind it: secret guards, git-lfs, signing.
+# Chain to the machine-level pre-commit when one exists. The target is
+# discovered at run time — never baked into this committed file — from the
+# repository's previous hooks directory (recorded by sync), then the global
+# hooksPath, then the checkout's default hooks directory. The machine hook
+# runs first so cheap secret guards reject before the heavier project gate.
+machine_hook() {
+  hook_name="$1"
+  for dir in \
+    "$(git config --get code-foundry.previousHooksPath 2>/dev/null || true)" \
+    "$(git config --global --get core.hooksPath 2>/dev/null || true)" \
+    "$(git rev-parse --git-common-dir 2>/dev/null || printf '.git')/hooks"
+  do
+    case "$dir" in
+      '' | .githooks | ./.githooks | */.githooks) continue ;;
+    esac
+    candidate="$dir/$hook_name"
+    if [ -f "$candidate" ] && ! [ "$candidate" -ef "$0" ]; then
+      printf '%s' "$candidate"
+      return 0
+    fi
+  done
+  return 1
+}
+
+if [ -z "${CODE_FOUNDRY_HOOK_CHAIN:-}" ]; then
+  if machine="$(machine_hook pre-commit)"; then
+    # The marker travels through the machine hook into anything it delegates
+    # back to: a guard that chains to .githooks/pre-commit (a mutual-delegation
+    # pair) re-enters this hook, sees the marker, and runs the gate instead of
+    # chaining again — machine policy once, project policy once, no loop.
+    if [ -x "$machine" ]; then
+      CODE_FOUNDRY_HOOK_CHAIN=1 "$machine" "$@" || exit $?
+    else
+      CODE_FOUNDRY_HOOK_CHAIN=1 sh "$machine" "$@" || exit $?
+    fi
+  fi
+fi
+
 # Prefer a runtime the repository already depends on. A repository opts into
 # the gate by depending on code-foundry; one that does not keeps the
 # whitespace guard and stays offline. Nothing is fetched at commit time.
