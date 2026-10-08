@@ -79,6 +79,11 @@ mise.local.lock
 .mise.local.lock
 *.code-workspace
 
+# Machine-local git hook delegates written by Code Foundry sync; only the
+# committed pre-commit gate is tracked.
+.githooks/*
+!.githooks/pre-commit
+
 # Repository-specific rules
 eval-results.json
 eval-results/
