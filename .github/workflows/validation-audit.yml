@@ -22,13 +22,14 @@ jobs:
     permissions:
       actions: read
       contents: read
+      issues: read
       packages: read
       security-events: write
-    uses: 0xPlayerOne/code-foundry/.github/workflows/validation.yml@v1.47.1
+    uses: 0xPlayerOne/code-foundry/.github/workflows/validation.yml@v1.48.3
     with:
       mode: audit
       runtime-repository: 0xPlayerOne/code-foundry
-      runtime-ref: v1.47.1
+      runtime-ref: v1.48.3
       ci-runner: ubuntu-slim
       test-runner: ubuntu-slim
       unit-runner: ubuntu-slim
