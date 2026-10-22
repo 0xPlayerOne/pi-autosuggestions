@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Code Foundry configuration",
+  "type": "object",
+  "properties": {
+    "formatter": {
+      "description": "Explicit JavaScript formatter. Omit to preserve repository scripts and the Oxfmt fallback.",
+      "type": "string",
+      "enum": ["oxfmt", "prettier", "bun"]
+    }
+  },
+  "additionalProperties": true
+}
