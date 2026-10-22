@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.8.27](https://github.com/0xPlayerOne/pi-autosuggestions/compare/pi-autosuggestions-v0.8.26...pi-autosuggestions-v0.8.27) (2026-10-22)
+
+
+### Maintenance
+
+* bun-1.4.4-cloud ([#97](https://github.com/0xPlayerOne/pi-autosuggestions/issues/97)) ([993bee1](https://github.com/0xPlayerOne/pi-autosuggestions/commit/993bee1fa33bb874549bcab12b50315b8f0cdd95))
+
 ## [0.8.26](https://github.com/0xPlayerOne/pi-autosuggestions/compare/pi-autosuggestions-v0.8.25...pi-autosuggestions-v0.8.26) (2026-10-08)
 
 
