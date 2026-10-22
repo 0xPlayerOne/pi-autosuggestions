@@ -115,16 +115,22 @@ If the worktree is dirty, stop and understand the existing changes before switch
 
 ## Local validation
 
-The repository runtime detects supported tools and skips checks that do not apply:
+Use the commands declared in this repository's manifests and documentation, or
+invoke the installed Code Foundry CLI. The shared runtime detects supported tools
+and skips checks that do not apply:
 
 ```sh
 npx code-foundry doctor
-npm run format:check   # or the package manager's equivalent
-npm run lint
-npm run type-check
-npm test
-Security and dependency audits run through the GitHub Security workflow.
+npx code-foundry plan --tier fast
+npx code-foundry check --tier fast
+npx code-foundry check --tier audit
 ```
+
+`doctor` diagnoses setup; `plan` discovers tasks without running them. `check`
+runs the selected tier: `fast` includes CI tasks, unit tests and performance,
+while `audit` adds integration, E2E and smoke.
+
+Security and dependency audits run through the GitHub Security workflow.
 
 Run the checks relevant to the change. For a release or security-sensitive change, run the complete set. Record the commands and results in the pull request.
 
