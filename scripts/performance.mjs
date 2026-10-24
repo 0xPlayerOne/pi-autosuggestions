@@ -4,6 +4,8 @@ import { performance } from 'node:perf_hooks'
 import { dirname, join } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 
+import { parseNpmPackMetrics } from './npm-pack.mjs'
+
 const root = join(dirname(fileURLToPath(import.meta.url)), '..')
 const check = process.argv.includes('--check')
 const budgets = JSON.parse(readFileSync(join(root, 'performance-budgets.json'), 'utf8'))
@@ -66,7 +68,7 @@ global.gc()
 const historyRetainedHeapBytes = Math.max(0, process.memoryUsage().heapUsed - heapBeforeHistory)
 
 const pack = run('npm', ['pack', '--dry-run', '--json', '--ignore-scripts'])
-const packInfo = JSON.parse(pack.stdout)[0]
+const packInfo = parseNpmPackMetrics(pack.stdout)
 const metrics = {
   buildMilliseconds: Math.round(build.elapsed * 100) / 100,
   testMilliseconds: Math.round(tests.elapsed * 100) / 100,
