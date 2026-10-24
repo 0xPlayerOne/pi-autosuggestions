@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.8.28](https://github.com/0xPlayerOne/pi-autosuggestions/compare/pi-autosuggestions-v0.8.27...pi-autosuggestions-v0.8.28) (2026-10-24)
+
+
+### Maintenance
+
+* update Code Foundry to 1.48.8, Pi to 1.4.0, and fix npm 12 pack parsing ([#99](https://github.com/0xPlayerOne/pi-autosuggestions/issues/99)) ([2c156ea](https://github.com/0xPlayerOne/pi-autosuggestions/commit/2c156eaab067f7d1ea3a490f849806bbc0e5fd66))
+
 ## [0.8.27](https://github.com/0xPlayerOne/pi-autosuggestions/compare/pi-autosuggestions-v0.8.26...pi-autosuggestions-v0.8.27) (2026-10-22)
 
 
