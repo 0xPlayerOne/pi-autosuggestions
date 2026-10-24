@@ -81,7 +81,20 @@ function saveConfig(): void {
 }
 /** Beam cursor: thin vertical bar, bold so it stands out. One cell wide. */
 const BEAM = '\x1b[1m▏\x1b[0m'
-/** Matches the reverse-video block the base renderer emits for the cursor. */
+/**
+ * The cursor cell in the base renderer's output.
+ *
+ * pi-tui 1.4 wraps it in APC fake-cursor markers — `ESC _pi:fc BEL <cell>
+ * ESC _pi:/fc BEL` — that the TUI layer resolves into reverse video (or drops
+ * for the hardware cursor) after components render. When the editor is
+ * focused a zero-width CURSOR_MARKER (`ESC _pi:c BEL`) precedes the cell; it
+ * is how the TUI parks the terminal cursor, so it must survive into our
+ * output. Older pi-tui emitted a reverse-video block directly; the `*` peer
+ * range spans both, so match either form.
+ */
+// oxlint-disable-next-line no-control-regex -- matching ANSI escape output requires control characters
+const FAKE_CURSOR = /(\x1b_pi:c\x07)?\x1b_pi:fc\x07([\s\S]*?)\x1b_pi:\/fc\x07/
+/** Matches the reverse-video block pre-1.4 base renderers emit for the cursor. */
 // oxlint-disable-next-line no-control-regex -- matching ANSI escape output requires control characters
 const REVERSE_CURSOR = /\x1b\[7m([\s\S]*?)\x1b\[0m/
 
@@ -975,37 +988,60 @@ class BashInlineEditor extends CustomEditor {
 
   render(width: number): string[] {
     const out = super.render(width)
-    // Replace the base renderer's reverse-video block cursor with a blinking
-    // beam. On ghost rows there is no separate cursor cell: the suggestion
-    // starts flush after the typed text and the blink highlights its first
-    // character instead.
-    const rowIdx = out.findIndex((row) => REVERSE_CURSOR.test(row))
-    if (rowIdx === -1) {
-      return out
+    // Replace the base renderer's fake cursor with a blinking beam. On ghost
+    // rows there is no separate cursor cell: the suggestion starts flush
+    // after the typed text and the blink highlights its first character
+    // instead. pi-tui 1.4 marks the cursor cell with APC fake-cursor
+    // markers; pre-1.4 rendered a reverse-video block. Match either so the
+    // `*` peer range keeps working across both renderer shapes, preferring
+    // the marker form so no styled row can masquerade as the cursor.
+    let rowIdx = out.findIndex((row) => FAKE_CURSOR.test(row))
+    let match: RegExpExecArray | null = null
+    let marker = ''
+    // FAKE_CURSOR captures the cell in group 2 (group 1 is the CURSOR_MARKER);
+    // REVERSE_CURSOR captures it in group 1.
+    let cellGroup = 1
+    if (rowIdx !== -1) {
+      const fake = FAKE_CURSOR.exec(out[rowIdx]!)
+      if (!fake) {
+        return out
+      }
+      match = fake
+      cellGroup = 2
+      // The zero-width CURSOR_MARKER (focused editors only) is how the TUI
+      // parks the hardware cursor; keep it at the head of our replacement
+      // so the native bar still rides the ghost's first character.
+      marker = fake[1] ?? ''
+    } else {
+      rowIdx = out.findIndex((row) => REVERSE_CURSOR.test(row))
+      if (rowIdx === -1) {
+        return out
+      }
+      match = REVERSE_CURSOR.exec(out[rowIdx]!)
     }
-    const row = out[rowIdx]!
-    const match = REVERSE_CURSOR.exec(row)
     if (!match) {
       return out
     }
-    const head = row.slice(0, match.index)
-    const ch = match[1] || ' '
+    const row = out[rowIdx]!
+    const head = row.slice(0, match.index) + marker
+    const tail = row.slice(match.index + match[0].length)
+    const ch = match[cellGroup] || ' '
     if (this.tui.getShowHardwareCursor()) {
-      // Native terminal cursor mode: strip the fake block so the real
+      // Native terminal cursor mode: strip the fake cursor so the real
       // blinking bar is the only cursor. It overlays the cell edge
       // without covering the character, and it rides the first ghost
       // character on suggestion rows.
       const ghost = this.activeGhost()
       if (!ghost) {
         // Empty cursor cell: the native bar blinks there, nothing covered.
-        out[rowIdx] = head + ch + row.slice(match.index + match[0].length)
+        out[rowIdx] = head + ch + tail
         return out
       }
       // The ghost starts AT the cursor cell so the native bar overlays
       // its first character (Apple Terminal bar-cursor behavior) instead
       // of sitting in a gap cell.
       const remainder = ghost.suggestion.slice(ghost.typed.length)
-      const pad = / *$/.exec(row.slice(match.index + match[0].length))?.[0].length ?? 0
+      const pad = / *$/.exec(tail)?.[0].length ?? 0
       const avail = pad + 1
       let used = 0
       const ghostCells: string[] = []
@@ -1028,7 +1064,7 @@ class BashInlineEditor extends CustomEditor {
       // full-width ghost run one column past the terminal, which aborts pi's
       // render loop (issue #67).
       const remainder = ghost.suggestion.slice(ghost.typed.length)
-      const pad = / *$/.exec(row.slice(match.index + match[0].length))?.[0].length ?? 0
+      const pad = / *$/.exec(tail)?.[0].length ?? 0
       const avail = Math.max(0, pad)
       let used = 0
       const ghostCells: string[] = []
@@ -1043,7 +1079,7 @@ class BashInlineEditor extends CustomEditor {
       out[rowIdx] = head + BEAM + ghostCells.join('') + ' '.repeat(Math.max(0, pad - used))
       return out
     }
-    out[rowIdx] = head + BEAM + row.slice(match.index + match[0].length)
+    out[rowIdx] = head + BEAM + tail
     return out
   }
 

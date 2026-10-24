@@ -18,7 +18,8 @@ process.env.HOME = home
 process.env.USERPROFILE = home
 
 const root = join(import.meta.dirname, '..')
-const { TuiMainScreen, Editor, visibleWidth } = await import('@earendil-works/pi-tui')
+const { TuiMainScreen, Editor, visibleWidth, CURSOR_MARKER } =
+  await import('@earendil-works/pi-tui')
 const loadExtension = (await import(join(root, 'dist/autosuggestions.js'))).default
 
 const theme = { borderColor: (str) => str, selectList: {} }
@@ -29,17 +30,45 @@ const keybindings = { matches: () => false }
 // handler. Loading it per test would stack a process 'exit' listener each time
 // and spray the cursor-restore sequence at the end of the run.
 let onSessionStart
+const registeredCommands = new Map()
+const exitListenersBeforeLoad = process.listenerCount('exit')
 const pi = {
   on: (event, handler) => {
     if (event === 'session_start') {
       onSessionStart = handler
     }
   },
-  registerCommand() {},
+  registerCommand: (name, definition) => registeredCommands.set(name, definition),
   exec: async () => ({ code: 0, stdout: '', stderr: '' }),
 }
 loadExtension(pi)
 assert.equal(typeof onSessionStart, 'function', 'extension did not register session_start')
+
+describe('extension load (pi 1.4)', () => {
+  it('registers exactly one exit handler so the cursor restore is not sprayed', () => {
+    // Loading the built extension twice would stack exit listeners; the
+    // one-shot install here is what keeps the restore sequence to a single
+    // emission per session.
+    assert.equal(
+      process.listenerCount('exit') - exitListenersBeforeLoad,
+      1,
+      'extension did not install exactly one process exit handler'
+    )
+  })
+
+  it('registers the autosuggest command with a handler and description', () => {
+    const command = registeredCommands.get('autosuggest')
+    assert.ok(command, 'extension did not register the autosuggest command')
+    assert.equal(typeof command.handler, 'function', 'autosuggest command has no handler')
+    assert.equal(typeof command.description, 'string', 'autosuggest command has no description')
+  })
+
+  it('installs an editor component on session_start', () => {
+    let factory
+    onSessionStart({}, { ui: { setEditorComponent: (fn) => (factory = fn) } })
+    assert.equal(typeof factory, 'function', 'extension did not install an editor component')
+  })
+})
 
 /**
  * Build an editor the way pi hands one to the custom component.
@@ -184,6 +213,86 @@ describe('custom editor', () => {
     editor.handleInput('\x1b')
     const dismissed = editor.render(80).join('')
     assert.doesNotMatch(dismissed, /status/, 'escape did not dismiss the ghost')
+  })
+})
+
+// pi-tui 1.4 replaced the reverse-video cursor block with APC fake-cursor
+// markers (`ESC _pi:fc BEL … ESC _pi:/fc BEL`, plus a zero-width CURSOR_MARKER
+// when focused). The extension's render() rewrites that cell into dimmed ghost
+// text, so it must consume the new markers without leaking them and without
+// dropping the marker the TUI uses to park the hardware cursor.
+describe('ghost keyboard contract (pi 1.4)', () => {
+  /** Submit prompts the way pi does, then type a prefix of them. */
+  function ghostEditor(prompts, text) {
+    const { editor } = createEditor()
+    editor.onSubmit = () => {}
+    for (const prompt of prompts) {
+      editor.onSubmit(prompt)
+    }
+    editor.setText(text)
+    return editor
+  }
+
+  /** The visible text of the ghost row (cursor cell and padding removed). */
+  function ghostRowText(editor) {
+    const row = editor.render(80).find((line) => DIM.test(line))
+    assert.ok(row, 'no ghost row was rendered')
+    return stripAnsi(row).trim()
+  }
+
+  it('accepts the whole ghost on right arrow', () => {
+    const editor = ghostEditor(['git status --short'], 'git st')
+    editor.handleInput('\x1b[C')
+    assert.equal(editor.getText(), 'git status --short')
+  })
+
+  it('accepts only through the next word boundary on alt+f', () => {
+    const editor = ghostEditor(['git status --short'], 'git st')
+    editor.handleInput('\x1bf')
+    assert.equal(editor.getText(), 'git status ')
+  })
+
+  it('accepts the ghost on Tab via the shadowed handleTabCompletion', () => {
+    const editor = ghostEditor(['git status --short'], 'git st')
+    editor.handleInput('\t')
+    assert.equal(editor.getText(), 'git status --short')
+  })
+
+  it('cycles history candidates on alt+down and back on alt+up', () => {
+    const editor = ghostEditor(['git status', 'git log --oneline'], 'git ')
+    assert.equal(ghostRowText(editor), 'git log --oneline')
+    editor.handleInput('\x1bn')
+    assert.equal(ghostRowText(editor), 'git status')
+    editor.handleInput('\x1bn')
+    assert.equal(ghostRowText(editor), 'git log --oneline')
+    editor.handleInput('\x1bp')
+    assert.equal(ghostRowText(editor), 'git status')
+    assert.equal(editor.getText(), 'git ', 'cycling must not mutate the buffer')
+  })
+
+  it('dismisses the ghost on escape without mutating the buffer', () => {
+    const editor = ghostEditor(['git status --short'], 'git st')
+    editor.handleInput('\x1b')
+    assert.equal(
+      editor.render(80).some((line) => line.includes('status')),
+      false
+    )
+    assert.equal(editor.getText(), 'git st')
+  })
+
+  it('keeps the CURSOR_MARKER and strips the fake cursor when focused', () => {
+    // The TUI parks the hardware cursor on CURSOR_MARKER; if render() drops it
+    // the blinking bar vanishes, and if the fake-cursor markers survive they
+    // render as literal APC garbage.
+    const editor = ghostEditor(['git status --short'], 'git st')
+    editor.focused = true
+    const row = editor.render(80).find((line) => line.includes('git st'))
+    assert.ok(row, 'the typed line did not render')
+    assert.ok(row.includes(CURSOR_MARKER), 'the CURSOR_MARKER was dropped')
+    assert.ok(!row.includes('\x1b_pi:fc\x07'), 'the fake-cursor start marker leaked')
+    assert.ok(!row.includes('\x1b_pi:/fc\x07'), 'the fake-cursor end marker leaked')
+    assert.match(row, DIM, 'ghost text is not dimmed')
+    assertFits(editor, 80)
   })
 })
 

@@ -41,6 +41,8 @@ htmlcov/
 artifacts/
 performance-results.json
 performance-results/
+eval-results.json
+eval-results/
 cache/
 !.github/actions/cache/
 !.github/actions/cache/action.yml
@@ -70,6 +72,9 @@ pnpm-debug.log*
 .fleet/
 .opencode/
 .kluster/
+.zcode/
+.kiro/
+.goose/
 .direnv/
 .envrc
 .vercel/
@@ -83,8 +88,8 @@ mise.local.lock
 # committed pre-commit gate is tracked.
 .githooks/*
 !.githooks/pre-commit
-.fleet-wt/
 
 # Repository-specific rules
+.fleet-wt/
 eval-results.json
 eval-results/
